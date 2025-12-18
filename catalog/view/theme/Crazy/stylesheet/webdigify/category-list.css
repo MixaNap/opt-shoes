@@ -1,0 +1,237 @@
+/* ------------------------ Start wd-category-feature Style ------------------------- */
+.wd_category_feature {
+    float: left;
+    position: relative;
+    width: 100%;
+    margin: 0 0 80px;
+    padding: 70px 0;
+    background: #1f1f1f;
+    text-align: center;
+}
+.wd_category_feature .list_carousel .wd_cat_content {
+	float: left;
+	width: 100%;
+	position: relative;
+	overflow: hidden;
+}
+.wd_category_feature .list_carousel .wd_cat_content .cat-img{
+    display: inline-block;
+    border-radius: 0;
+    overflow: hidden;
+    vertical-align: top;
+    float: left;
+    width: 100%;
+    display: none;
+}
+.wd_category_feature .list_carousel .wd_cat_content .cat-img img {
+    max-width: 100%;
+	transition: .9s ease-in-out;
+    -webkit-transition: .9s ease-in-out;
+    -moz-transition: .9s ease-in-out;
+    -ms-transition: .9s ease-in-out;
+    -o-transition: .9s ease-in-out;
+}
+.wd_category_feature .list_carousel .item:hover .wd_cat_content .cat-img img {
+    transform: scale(1.2);
+    transition: .9s ease-in-out;
+    -webkit-transition: .9s ease-in-out;
+    -moz-transition: .9s ease-in-out;
+    -ms-transition: .9s ease-in-out;
+    -o-transition: .9s ease-in-out;
+}
+.wd_category_feature .wdfcat-items .list_carousel {
+    margin:0 -8px;
+}
+.wd_category_feature .item {
+	padding: 0 8px;
+    float: none;
+    width: auto;
+    margin: 6px 0;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+}
+.wd_category_feature .list_carousel .wd_cat_content .wdcat-content .cat-more {
+	list-style: none;
+    float: none;
+    display: inline-block;
+    margin: 0;
+    padding:0px;
+    transition: .4s ease-in-out;
+    -webkit-transition: .4s ease-in-out;
+    -moz-transition: .4s ease-in-out;
+    -ms-transition: .4s ease-in-out;
+	-o-transition: .4s ease-in-out;
+}
+.wd_category_feature .list_carousel .item:hover .wdcat-content .cat-more{
+    transition: .4s ease-in-out;
+    -webkit-transition: .4s ease-in-out;
+    -moz-transition: .4s ease-in-out;
+    -ms-transition: .4s ease-in-out;
+    -o-transition: .4s ease-in-out;
+}
+#wd_category_feature .box-heading {
+    margin: 0 0 32px;
+    color: #ffffff;
+}
+.wd_category_feature .list_carousel .wd_cat_content .wdcat-content .title {
+    float: left;
+    width: 100%;
+    position: relative;
+    margin: 0;
+}
+.wd_category_feature .list_carousel .wd_cat_content .wdcat-content {
+    text-align: left;
+    z-index: 1;
+    width: 100%;
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
+}
+.wd_category_feature .list_carousel .wd_cat_content:hover .wdcat-content{
+	opacity: 1;
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
+}
+.wd_category_feature .list_carousel .content {
+	padding:0 0px;
+	float: left;
+	width:100%;
+	overflow: hidden;
+}
+.wd_category_feature .list_carousel .wd_cat_content .title a {
+    letter-spacing: 0;
+    font-size: 14px;
+    line-height: 34px;
+    font-weight: 500;
+    color: #fff;
+    text-transform: capitalize;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 7px 40px;
+    border: 1px solid #fff;
+    transition: all 400ms ease-in-out 0s;
+    -webkit-transition: all 400ms ease-in-out 0s;
+    -moz-transition: all 400ms ease-in-out 0s;
+    -o-transition: all 400ms ease-in-out 0s;
+    -ms-transition: all 400ms ease-in-out 0s;
+    display: inline-block;
+    vertical-align: top;
+}
+.wd_category_feature .list_carousel .wd_cat_content .title a:hover{
+    background-color: #ffffff;
+    color:#111111;
+}
+.wd_category_feature .list_carousel .wd_cat_content .wdcat-content .sub-cat li .category-name a {
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 32px;
+	color: #111;
+}
+.wd_category_feature .list_carousel .wd_cat_content .wdcat-content .sub-cat li .category-name a:hover {
+	text-decoration: underline;
+}
+.wd_category_feature .list_carousel .wd_cat_content .wdcat-content li {
+	list-style: none;
+}
+.wd_category_feature .list_carousel .wdcat-content .category-viewall {
+	font-size: 14px;
+    font-weight: 400;
+    color: #767676;
+    text-transform: capitalize;
+    padding: 0;
+    padding: 0;
+    transition: .4s ease-in-out;
+    -webkit-transition: .4s ease-in-out;
+    -moz-transition: .4s ease-in-out;
+    -ms-transition: .4s ease-in-out;
+    -o-transition: .4s ease-in-out;
+}
+.wd_category_feature .list_carousel .item .wdcat-content .category-viewall:hover {
+	background-color: #111111;
+    color: #fff;
+	transition: .4s ease-in-out;
+	-webkit-transition: .4s ease-in-out;
+	-moz-transition: .4s ease-in-out;
+	-ms-transition: .4s ease-in-out;
+	-o-transition: .4s ease-in-out;
+}
+
+@media (max-width:1199px) {
+    .wd_category_feature {
+        padding: 40px 0 50px;
+        margin: 0 0 60px;
+    }
+    #wd_category_feature .box-heading {
+        margin: 0 0 30px;
+    }
+
+}
+@media (max-width:991px) {
+    .wd_category_feature {
+        padding:40px 0 40px;
+        margin: 0 0 30px;
+    }
+    #wd_category_feature .box-heading {
+        margin: 0 0 25px;
+    }
+    .wd_category_feature .list_carousel .wd_cat_content .title a {
+        padding: 3px 30px;
+    }
+}
+@media (max-width:767px) {
+    .wd_category_feature {
+        padding: 30px 0 30px;
+        margin: 0 0 20px;
+    }
+    .wd_category_feature .item {
+        padding: 0 3px;
+    }
+    .wd_category_feature .wdfcat-items .list_carousel {
+        margin: 0;
+    }
+    .wd_category_feature .item .cat-img:before, .wd_category_feature .item .cat-img:after {
+        opacity: 1;
+    }
+    .wd_category_feature .list_carousel .wd_cat_content .wdcat-content {
+        opacity: 1;
+    }
+}
+@media (max-width:543px) {
+    .wd_category_feature .list_carousel .wd_cat_content .title a {
+        padding: 0px 13px;
+        font-size: 13px;
+    }
+    .wd_category_feature .item {
+        margin: 2px 0;
+    }
+}
+@media (max-width:479px){
+    .wd_category_feature {
+        margin: 0;
+    }
+    .wd_category_feature .list_carousel .wd_cat_content .wdcat-content {
+        top: 24%;
+    }
+	.wd_category_feature .list_carousel .content {
+		 width: 100%;
+		 text-align:center;
+	}
+  .wd_category_feature .list_carousel .wd_cat_content {
+	width: auto;
+	display: inline-block;
+	vertical-align: top;
+	float: none;
+}
+.wd_category_feature .list_carousel .wdcat-content .category-viewall {
+    font-size: 13px;
+}
+#wd_category_feature .box-heading {
+    margin: 0 0 20px;
+}
+}
+
+

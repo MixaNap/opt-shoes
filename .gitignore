@@ -1,0 +1,50 @@
+# OpenCart cache
+storage/cache/*
+!storage/cache/index.php
+storage/modification/*
+!storage/modification/index.php
+
+# Logs
+storage/logs/*
+!storage/logs/index.php
+
+# Uploads
+system/storage/download/*
+system/storage/upload/*
+system/storage/vendor/*
+
+# Config files (містять локальні налаштування та паролі)
+config.php
+admin/config.php
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Node modules (якщо використовується)
+node_modules/
+
+# Composer (якщо використовується)
+vendor/
+composer.lock
+
+# SQL files (опціонально - якщо не хочете комітити)
+# Розкоментуйте якщо не хочете комітити SQL скрипти
+# *.sql
+
+# Документація (опціонально)
+# *.md
+

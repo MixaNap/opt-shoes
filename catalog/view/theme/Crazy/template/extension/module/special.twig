@@ -1,0 +1,141 @@
+	<div class="box special bottom-to-top hb-animate-element">
+		<div class="container">
+			<div class="row">
+  <div class="box-heading">{{ heading_title }}</div>
+
+  <div class="box-content">
+		{% set sliderFor = 5 %}
+		{% set productCount = products|length %}
+	{% if productCount >= sliderFor %}
+		<div class="customNavigation">
+			<a class="fa prev wdspecial_prev fa-arrow-left">&nbsp;</a>
+			<a class="fa next wdspecial_next fa-arrow-right">&nbsp;</a>
+		</div>	
+	{% endif %}
+	
+	<div class="box-product {% if productCount >= sliderFor %}owl-carousel specialcarousel{% else %} productbox-grid{% endif %}" id="{% if productCount >= sliderFor %}special-carousel{% else %}special-grid{% endif %}">
+  {% for product in products %}
+  <div class="{% if productCount >= sliderFor %}slider-item{% else %}product-items{% endif %}">
+    <div class="product-block product-thumb transition">
+	  <div class="product-block-inner">	  	
+		<div class="image {% if product.qty == 0 %}outstock{% endif %}">
+			{% if product.thumb_swap %}
+					<a href="{{ product.href }}">
+					<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive reg-image"/>
+					<div class="image_content">
+					<img class="img-responsive hover-image" src="{{ product.thumb_swap }}" title="{{ product.name }}" alt="{{ product.name }}"/>
+					</div>
+					</a>
+					{% else %}
+					<a href="{{ product.href }}">
+					<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive"/></a>
+			{% endif %}
+			
+			{% if product.special %}
+			<span class="special-tag">{{product.percentsaving}}%</span>
+		{% endif %}
+		<div class="countdown">
+					{% if product.specialTime %}
+					 <div class="count-down clock">
+					<div data-countdown="{{ product.specialTime }}" class="countbox hastime"></div>
+					</div>	
+					{% endif %}
+				</div>	
+		
+	  {% if product.qty == 0 %}
+	  <span class="stock_status">{{text_outstock}}</span>
+    {% endif %} 
+		</div>
+      	<div class="product-details">
+			<div class="caption">
+					
+				  
+		 {% if product.rating %}
+			<div class="rating">
+				{% for i in 1..5 %}
+				{% if product.rating < i %}
+				<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+				{% else %}
+				<span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+				{% endif %}
+				{% endfor %}
+				{#&nbsp;<span style="cursor:pointer;" class="total-review{{ product.product_id }}">({{product.review}})</span>#}
+			</div>
+		{% endif %}
+				 
+				<h4><a href="{{ product.href }} ">{{ product.name }} </a></h4>
+				
+				{% if product.price %}
+        			<p class="price">
+       			    {% if not product.special %}
+          			{{ product.price }}
+         			{% else %}
+         			<span class="price-new">{{ product.special }}</span> <span class="price-old">{{ product.price }}</span>
+			        {% endif %}
+  		            {% if product.tax %}
+		            <span class="price-tax">{{ text_tax }} {{ product.tax }}</span>
+          			{% endif %}
+			        </p>
+				{% endif %}
+				<div class="product_hover_block">
+											
+					<div class="product_hover_block_inner">
+						<button class="wishlist" type="button"  title="{{ button_wishlist }} " onclick="wishlist.add('{{ product.product_id }} ');"></button>
+						<button class="compare_button" type="button"  title="{{ button_compare }} " onclick="compare.add('{{ product.product_id }} ');"></button>
+						<div class="quickview-button">
+							<a class="quickbox"  title="{{ button_quickview }}" href="{{ product.quick }}"></a>
+						</div>
+					</div>
+					<div class="action">
+						{% if product.qty > 0 %}
+							<button type="button" class="cart_button" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" >{{ button_cart }}</button>
+						{% else %}
+							<button type="button" class="cart_button out_of_stock" title="{{text_outstock}}" >{{text_outstock}}</button>
+						{% endif %}
+				</div> 
+			</div>
+				{#<p class="desc">{{ product.description }}</p>#}
+			</div>		
+ 	  
+				
+				{% if stock_qty =='true' %}
+				<span class="stock_msg" style="color:#228B22;">{{ text_productavail }} : {{qty_stock}}</span>
+				{% endif %}
+				
+				
+	  	</div>
+  	</div>
+	</div>
+</div>
+  
+ {% endfor %}
+</div>
+  </div>
+</div>
+</div>
+</div>
+<span class="special_default_width" style="display:none; visibility:hidden"></span>
+
+<script type="text/javascript"><!--
+
+$(document).ready(function(){
+	$('.specialcarousel').owlCarousel({
+		items: 4,
+		singleItem: false,
+		navigation: false,
+		pagination: false,
+		itemsDesktop : [1499,4],
+		itemsDesktopSmall :	[1199,4],
+		itemsTablet :	[991,3],
+		itemsTabletSmall :	[650,2],
+		itemsMobile :	[319,1]
+	});
+	// Custom Navigation Events
+	$(".wdspecial_next").click(function(){
+		$('.specialcarousel').trigger('owl.next');
+	})
+	$(".wdspecial_prev").click(function(){
+		$('.specialcarousel').trigger('owl.prev');
+	});	
+});	
+--></script>
