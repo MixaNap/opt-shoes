@@ -126,6 +126,9 @@ $files_to_update = [
     'catalog/view/theme/Crazy/template/checkout/cart.twig',
     'catalog/view/theme/Crazy/template/common/cart.twig',
     
+    // Адмін шаблони
+    'admin/view/template/common/footer.twig',
+    
     // Система
     'system/library/cart/cart.php',
 ];
