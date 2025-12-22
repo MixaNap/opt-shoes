@@ -1,2 +1,46 @@
-<footer id="footer">{{ text_footer }}<br/>{{ text_version }}</footer></div>
+<footer id="footer">{{ text_footer }}<br/>{{ text_version }}</footer>
+<style>
+/* Приховуємо банер PayPal з OpenCart */
+a[href*="opencart.com/index.php?route=cms/banner/redirect"][href*="banner_id=8"],
+a[href*="opencart.com/index.php?route=cms/banner/redirect"][href*="banner_id=8"] + img,
+div.text-center a[href*="opencart.com/index.php?route=cms/banner/redirect"][href*="banner_id=8"],
+div.text-center a[href*="opencart.com/index.php?route=cms/banner/redirect"][href*="banner_id=8"] img,
+img[src*="image.opencart.com/original/6512e46509f46.jpg"],
+img[title="PayPal Commerce Platform"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    opacity: 0 !important;
+}
+</style>
+<script>
+// Блокуємо завантаження банера PayPal через JavaScript
+(function() {
+    // Блокуємо запити до OpenCart banner API
+    if (typeof XMLHttpRequest !== 'undefined') {
+        var originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+            if (url && (url.indexOf('opencart.com/index.php?route=cms/banner/redirect') !== -1 || url.indexOf('banner_id=8') !== -1)) {
+                return false;
+            }
+            return originalOpen.apply(this, arguments);
+        };
+    }
+    
+    // Видаляємо банери після завантаження сторінки
+    setTimeout(function() {
+        var banners = document.querySelectorAll('a[href*="opencart.com/index.php?route=cms/banner/redirect"][href*="banner_id=8"], img[src*="image.opencart.com/original/6512e46509f46.jpg"], img[title="PayPal Commerce Platform"]');
+        banners.forEach(function(banner) {
+            var parent = banner.parentElement;
+            if (parent && parent.classList.contains('text-center')) {
+                parent.remove();
+            } else {
+                banner.remove();
+            }
+        });
+    }, 1000);
+})();
+</script>
+</div>
 </body></html>
