@@ -151,6 +151,75 @@ foreach ($files_to_update as $file) {
     }
 }
 
+// Вимкнення модуля Carousel з банером PayPal
+echo "\nDisabling PayPal banner module...\n";
+$paypalBannerDisabled = false;
+
+// Спробуємо прочитати конфігурацію БД з config.php
+$configFile = $baseDir . '/config.php';
+if (file_exists($configFile)) {
+    // Читаємо config.php
+    $configContent = file_get_contents($configFile);
+    
+    // Витягуємо дані БД з config.php
+    preg_match("/define\('DB_HOSTNAME',\s*'([^']+)'\)/", $configContent, $hostname);
+    preg_match("/define\('DB_USERNAME',\s*'([^']+)'\)/", $configContent, $username);
+    preg_match("/define\('DB_PASSWORD',\s*'([^']+)'\)/", $configContent, $password);
+    preg_match("/define\('DB_DATABASE',\s*'([^']+)'\)/", $configContent, $database);
+    preg_match("/define\('DB_PREFIX',\s*'([^']+)'\)/", $configContent, $prefix);
+    
+    if (!empty($hostname[1]) && !empty($username[1]) && !empty($database[1])) {
+        $dbHost = $hostname[1];
+        $dbUser = $username[1];
+        $dbPass = isset($password[1]) ? $password[1] : '';
+        $dbName = $database[1];
+        $dbPrefix = isset($prefix[1]) ? $prefix[1] : 'oc_';
+        
+        // Підключення до БД
+        $mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+        
+        if (!$mysqli->connect_error) {
+            // Вимикаємо модуль Carousel з ID=29 (Home Page Carousel з banner_id=8)
+            // Оновлюємо JSON setting, встановлюючи status в '0'
+            $moduleId = 29;
+            $query = "SELECT `setting` FROM `" . $dbPrefix . "module` WHERE `module_id` = " . (int)$moduleId . " AND `code` = 'carousel'";
+            $result = $mysqli->query($query);
+            
+            if ($result && $result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $setting = json_decode($row['setting'], true);
+                
+                if (is_array($setting) && isset($setting['status']) && $setting['status'] == '1') {
+                    $setting['status'] = '0';
+                    $newSetting = json_encode($setting);
+                    $updateQuery = "UPDATE `" . $dbPrefix . "module` SET `setting` = '" . $mysqli->real_escape_string($newSetting) . "' WHERE `module_id` = " . (int)$moduleId;
+                    
+                    if ($mysqli->query($updateQuery)) {
+                        echo "<span class='success'>✓ PayPal banner module disabled</span>\n";
+                        $paypalBannerDisabled = true;
+                    } else {
+                        echo "<span class='error'>✗ Failed to disable PayPal banner module: " . $mysqli->error . "</span>\n";
+                    }
+                } else {
+                    echo "<span class='info'>ℹ PayPal banner module already disabled</span>\n";
+                    $paypalBannerDisabled = true;
+                }
+            } else {
+                echo "<span class='info'>ℹ PayPal banner module not found (may be already removed)</span>\n";
+                $paypalBannerDisabled = true;
+            }
+            
+            $mysqli->close();
+        } else {
+            echo "<span class='error'>✗ Database connection failed: " . $mysqli->connect_error . "</span>\n";
+        }
+    } else {
+        echo "<span class='error'>✗ Could not read database config from config.php</span>\n";
+    }
+} else {
+    echo "<span class='error'>✗ config.php not found</span>\n";
+}
+
 // Очищення кешу
 echo "\nClearing cache...\n";
 
@@ -227,6 +296,7 @@ if ($failed > 0) {
 }
 echo "\nCache: " . ($cacheCleared ? "<span class='success'>Cleared</span>" : "<span class='error'>Failed</span>") . "\n";
 echo "Modification: " . ($modificationCleared ? "<span class='success'>Cleared</span>" : "<span class='error'>Failed</span>") . "\n";
+echo "PayPal Banner: " . ($paypalBannerDisabled ? "<span class='success'>Disabled</span>" : "<span class='error'>Failed</span>") . "\n";
 echo "========================================\n";
 
 if ($updated === count($files_to_update) && $cacheCleared && $modificationCleared) {
