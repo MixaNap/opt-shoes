@@ -51,10 +51,15 @@ class ControllerCommonCart extends Controller {
 
 		$this->load->model('tool/image');
 		$this->load->model('tool/upload');
+		$this->load->model('catalog/product');
 
 		$data['products'] = array();
 
 		foreach ($this->cart->getProducts() as $product) {
+			// Отримуємо інформацію про товар з БД для перевірки продажу упаковками
+			$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+			$sell_by_pack = isset($product_info['sell_by_pack']) ? (int)$product_info['sell_by_pack'] : 0;
+			$pack_size = isset($product_info['pack_size']) ? (int)$product_info['pack_size'] : 0;
 			if ($product['image']) {
 				$image = $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
 			} else {
@@ -87,11 +92,31 @@ class ControllerCommonCart extends Controller {
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 				
-				$price = $this->currency->format($unit_price, $this->session->data['currency']);
-				$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+				// Якщо товар продається упаковками, розраховуємо кількість упаковок та ціну за упаковку
+				$quantity_packs = 0;
+				$price_per_pack = '';
+				$price_per_unit_formatted = '';
+				
+				if ($sell_by_pack && $pack_size > 0) {
+					$quantity_packs = floor($product['quantity'] / $pack_size);
+					$price_per_pack_numeric = $unit_price * $pack_size;
+					$price_per_pack = $this->currency->format($price_per_pack_numeric, $this->session->data['currency']);
+					$price_per_unit_numeric = $unit_price;
+					$price_per_unit_formatted = $this->currency->format($price_per_unit_numeric, $this->session->data['currency']);
+					// Ціна за упаковку
+					$price = $price_per_pack;
+					// Загальна вартість = кількість упаковок * ціна за упаковку
+					$total = $this->currency->format($price_per_pack_numeric * $quantity_packs, $this->session->data['currency']);
+				} else {
+					$price = $this->currency->format($unit_price, $this->session->data['currency']);
+					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+				}
 			} else {
 				$price = false;
 				$total = false;
+				$quantity_packs = 0;
+				$price_per_pack = '';
+				$price_per_unit_formatted = '';
 			}
 
 			$data['products'][] = array(
@@ -102,6 +127,11 @@ class ControllerCommonCart extends Controller {
 				'option'    => $option_data,
 				'recurring' => ($product['recurring'] ? $product['recurring']['name'] : ''),
 				'quantity'  => $product['quantity'],
+				'quantity_packs' => isset($quantity_packs) ? $quantity_packs : 0,
+				'sell_by_pack' => $sell_by_pack,
+				'pack_size' => $pack_size,
+				'price_per_pack' => isset($price_per_pack) ? $price_per_pack : '',
+				'price_per_unit_formatted' => isset($price_per_unit_formatted) ? $price_per_unit_formatted : '',
 				'price'     => $price,
 				'total'     => $total,
 				'href'      => $this->url->link('product/product', 'product_id=' . $product['product_id'])
