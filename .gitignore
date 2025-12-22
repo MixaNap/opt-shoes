@@ -3,6 +3,8 @@ storage/cache/*
 !storage/cache/index.php
 storage/modification/*
 !storage/modification/index.php
+image/cache/*
+!image/cache/index.php
 
 # Logs
 storage/logs/*
