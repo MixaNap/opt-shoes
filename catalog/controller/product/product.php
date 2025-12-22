@@ -306,21 +306,18 @@ class ControllerProductProduct extends Controller {
 				);
 			}
 
-			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-				$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-			} else {
-				$data['price'] = false;
-			}
-
+			// Конвертуємо ціни з базової валюти в поточну валюту сесії (грн) ПЕРЕД всіма розрахунками
+			// ВАЖЛИВО: Ціни в БД зберігаються в USD, тому використовуємо USD як базову валюту для конвертації
+			$base_currency = 'USD'; // Ціни в БД зберігаються в USD
+			$current_currency = $this->session->data['currency'];
+			
+			// Конвертуємо базову ціну з USD в поточну валюту (UAH)
+			// Використовуємо currency->convert() для правильної конвертації
+			$price_converted = $this->currency->convert($product_info['price'], $base_currency, $current_currency);
+			$special_converted = false;
 			if (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
-				$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-				$tax_price = (float)$product_info['special'];
-			} else {
-				$data['special'] = false;
-				$tax_price = (float)$product_info['price'];
+				$special_converted = $this->currency->convert($product_info['special'], $base_currency, $current_currency);
 			}
-			//calculate discount on product page
-			$data['percentsaving'] = round((($product_info['price'] - $product_info['special'])/$product_info['price'])*100, 0);
 			
 			// Дані про упаковку та ціну за штуку
 			$data['sell_by_pack'] = isset($product_info['sell_by_pack']) ? $product_info['sell_by_pack'] : 0;
@@ -329,39 +326,95 @@ class ControllerProductProduct extends Controller {
 			$data['price_per_unit_formatted'] = false;
 			$data['special_per_unit_formatted'] = false;
 			
-			// Числові значення цін для JavaScript (без форматування)
-			$data['price_numeric'] = (float)$product_info['price'];
-			$data['special_numeric'] = (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) ? (float)$product_info['special'] : false;
+			// Числові значення цін для JavaScript (вже в поточній валюті - грн)
+			$data['price_numeric'] = (float)$price_converted;
+			$data['special_numeric'] = $special_converted !== false ? (float)$special_converted : false;
 			$data['price_per_pack_numeric'] = false;
 			$data['price_per_unit_numeric'] = false;
 			
+			// Відображення ціни (з форматуванням та податками)
+			// ВАЖЛИВО: tax->calculate() очікує базову ціну (в USD), потім currency->format() сама конвертує
+			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				// Спочатку розраховуємо податки з базової ціни (в USD)
+				$price_with_tax_base = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				// currency->format() сама конвертує з USD в поточну валюту (UAH), тому передаємо базову ціну
+				$data['price'] = $this->currency->format($price_with_tax_base, $current_currency);
+				// Для JavaScript отримуємо числове значення після конвертації та податків (БЕЗ форматування)
+				$price_with_tax_converted = $this->currency->convert($price_with_tax_base, 'USD', $current_currency);
+				$data['price_numeric_formatted'] = (float)$price_with_tax_converted;
+			} else {
+				$data['price'] = false;
+				$data['price_numeric_formatted'] = 0;
+			}
+
+			if (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
+				// Спочатку розраховуємо податки з базової спеціальної ціни (в USD)
+				$special_with_tax_base = $this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				// currency->format() сама конвертує з USD в поточну валюту (UAH), тому передаємо базову ціну
+				$data['special'] = $this->currency->format($special_with_tax_base, $current_currency);
+				// Для JavaScript отримуємо числове значення після конвертації та податків (БЕЗ форматування)
+				$special_with_tax_converted = $this->currency->convert($special_with_tax_base, 'USD', $current_currency);
+				$data['special_numeric_formatted'] = (float)$special_with_tax_converted;
+				$tax_price = (float)$data['special_numeric'];
+			} else {
+				$data['special'] = false;
+				$data['special_numeric_formatted'] = false;
+				$tax_price = (float)$data['price_numeric'];
+			}
+			
+			// ВАЖЛИВО: Для JavaScript використовуємо значення БЕЗ форматування currency->format()
+			// Але з урахуванням того, що currency->format() може автоматично конвертувати
+			// Тому використовуємо вже конвертовану ціну БЕЗ податків для розрахунків
+			//calculate discount on product page
+			$data['percentsaving'] = round((($data['price_numeric'] - ($data['special_numeric'] !== false ? $data['special_numeric'] : $data['price_numeric']))/$data['price_numeric'])*100, 0);
+			
 			if ($data['sell_by_pack'] && $data['pack_size'] > 0) {
-				// Розраховуємо ціну за штуку з базової ціни
-				$data['price_per_unit'] = (float)$product_info['price'] / $data['pack_size'];
-				$data['price_per_unit_numeric'] = $this->tax->calculate($data['price_per_unit'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				// Розраховуємо ціну за штуку з базової ціни (вже конвертованої в грн для JavaScript)
+				$data['price_per_unit'] = (float)$price_converted / $data['pack_size'];
+				// Для JavaScript потрібна ціна БЕЗ податків (вже конвертована)
+				$data['price_per_unit_numeric'] = (float)$data['price_per_unit'];
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					$data['price_per_unit_formatted'] = $this->currency->format($data['price_per_unit_numeric'], $this->session->data['currency']);
+					// Для відображення використовуємо базову ціну в USD, currency->format() сама конвертує
+					$price_per_unit_base = (float)$product_info['price'] / $data['pack_size'];
+					$price_per_unit_with_tax = $this->tax->calculate($price_per_unit_base, $product_info['tax_class_id'], $this->config->get('config_tax'));
+					$data['price_per_unit_formatted'] = $this->currency->format($price_per_unit_with_tax, $current_currency);
 				}
 				
-				// Розраховуємо ціну за упаковку (з урахуванням податків)
-				$data['price_per_pack_numeric'] = $this->tax->calculate($data['price_numeric'], $product_info['tax_class_id'], $this->config->get('config_tax'));
-				
-				// Розраховуємо ціну за штуку зі спеціальної ціни (якщо є)
+				// Розраховуємо ціну за упаковку (вже конвертовану в грн, з урахуванням податків)
 				if ($data['special_numeric'] !== false) {
+					// Використовуємо спеціальну ціну якщо вона є
+					// Для JavaScript використовуємо ціну БЕЗ податків (вже конвертовану в поточну валюту)
+					$data['price_per_pack_numeric'] = (float)$data['special_numeric'];
+					
+					// Розраховуємо ціну за штуку зі спеціальної ціни (вже конвертованої для JavaScript)
 					$special_per_unit = (float)$data['special_numeric'] / $data['pack_size'];
-					$data['special_per_unit_numeric'] = $this->tax->calculate($special_per_unit, $product_info['tax_class_id'], $this->config->get('config_tax'));
+					// Для JavaScript потрібна ціна БЕЗ податків (вже конвертована)
+					$data['special_per_unit_numeric'] = (float)$special_per_unit;
 					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-						$data['special_per_unit_formatted'] = $this->currency->format($data['special_per_unit_numeric'], $this->session->data['currency']);
+						// Для відображення використовуємо базову спеціальну ціну в USD, currency->format() сама конвертує
+						$special_per_unit_base = (float)$product_info['special'] / $data['pack_size'];
+						$special_per_unit_with_tax = $this->tax->calculate($special_per_unit_base, $product_info['tax_class_id'], $this->config->get('config_tax'));
+						$data['special_per_unit_formatted'] = $this->currency->format($special_per_unit_with_tax, $current_currency);
 					}
-					// Оновлюємо ціну за упаковку на спеціальну
-					$data['price_per_pack_numeric'] = $this->tax->calculate($data['special_numeric'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				} else {
+					// Використовуємо базову ціну
+					// Для JavaScript використовуємо ціну БЕЗ податків (вже конвертовану в поточну валюту)
+					$data['price_per_pack_numeric'] = (float)$data['price_numeric'];
 				}
 			} else {
 				// Для товарів що продаються поштучно
-				$data['price_per_unit_numeric'] = $this->tax->calculate($data['price_numeric'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+				// Для JavaScript потрібна ціна БЕЗ податків (вже конвертована в поточну валюту)
+				// ВАЖЛИВО: Використовуємо вже конвертовану ціну БЕЗ податків для розрахунків
 				if ($data['special_numeric'] !== false) {
-					$data['price_per_unit_numeric'] = $this->tax->calculate($data['special_numeric'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+					// Якщо є спеціальна ціна, використовуємо вже конвертовану спеціальну ціну БЕЗ податків
+					$data['price_per_unit_numeric'] = (float)$data['special_numeric'];
+				} else {
+					// Використовуємо вже конвертовану базову ціну БЕЗ податків
+					$data['price_per_unit_numeric'] = (float)$data['price_numeric'];
 				}
+				
+				// DEBUG: Логування для діагностики
+				error_log("DEBUG product.php (individual): product_id=" . $product_info['product_id'] . ", base_price=" . $product_info['price'] . ", price_converted=" . $price_converted . ", price_numeric=" . $data['price_numeric'] . ", price_per_unit_numeric=" . $data['price_per_unit_numeric'] . ", price_numeric_formatted=" . $data['price_numeric_formatted']);
 			}
 
 			if ($this->config->get('config_tax')) {

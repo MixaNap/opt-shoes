@@ -8,6 +8,7 @@ class Cart {
 	private $db;
 	private $tax;
 	private $weight;
+	private $currency;
 
 	public function __construct($registry) {
 		$this->config = $registry->get('config');
@@ -16,6 +17,7 @@ class Cart {
 		$this->db = $registry->get('db');
 		$this->tax = $registry->get('tax');
 		$this->weight = $registry->get('weight');
+		$this->currency = $registry->get('currency');
 
 		// Remove all the expired carts with no customer ID
 		$this->db->query("DELETE FROM " . DB_PREFIX . "cart WHERE (api_id > '0' OR customer_id = '0') AND date_added < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
@@ -44,7 +46,7 @@ class Cart {
 		foreach ($cart_query->rows as $cart) {
 			$stock = true;
 
-			$product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_store p2s LEFT JOIN " . DB_PREFIX . "product p ON (p2s.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND p2s.product_id = '" . (int)$cart['product_id'] . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.date_available <= NOW() AND p.status = '1'");
+			$product_query = $this->db->query("SELECT *, IFNULL(p.sell_by_pack, 0) AS sell_by_pack, IFNULL(p.pack_size, 0) AS pack_size FROM " . DB_PREFIX . "product_to_store p2s LEFT JOIN " . DB_PREFIX . "product p ON (p2s.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND p2s.product_id = '" . (int)$cart['product_id'] . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.date_available <= NOW() AND p.status = '1'");
 
 			if ($product_query->num_rows && ($cart['quantity'] > 0)) {
 				$option_price = 0;
@@ -241,6 +243,39 @@ class Cart {
 					$recurring = false;
 				}
 
+				// Перевіряємо чи товар продається упаковками
+				$sell_by_pack = isset($product_query->row['sell_by_pack']) ? (int)$product_query->row['sell_by_pack'] : 0;
+				$pack_size = isset($product_query->row['pack_size']) ? (int)$product_query->row['pack_size'] : 0;
+				
+				// Конвертуємо ціну з базової валюти в поточну валюту (долар -> грн)
+				// ВАЖЛИВО: $price вже містить базову ціну (в доларах) з БД
+				// ВАЖЛИВО: $option_price також в доларах з БД
+				// Потрібно конвертувати її в поточну валюту перед розрахунком totals
+				$base_currency = 'USD'; // Ціни в БД зберігаються в USD
+				$current_currency = $this->session->data['currency'];
+				
+				// ВАЖЛИВО: Для розрахунку totals використовуємо ТІЛЬКИ базову ціну БЕЗ опцій
+				// Опції не повинні впливати на загальну вартість товару в кошику
+				// Конвертуємо ТІЛЬКИ базову ціну БЕЗ опцій для розрахунку totals
+				$price_converted = $this->currency->convert($price, $base_currency, $current_currency);
+				// Опції не додаються до ціни для розрахунку totals
+				
+				// Для розрахунку totals використовуємо кількість штук (як завжди)
+				// Але якщо товар продається упаковками, то price вже є ціною за упаковку,
+				// тому потрібно використовувати кількість упаковок для totals
+				$quantity_for_total = $cart['quantity'];
+				
+				if ($sell_by_pack && $pack_size > 0) {
+					// Товар продається упаковками: price = ціна за упаковку, quantity = штуки
+					// Для totals потрібно використовувати кількість упаковок
+					$quantity_packs = (int)floor($cart['quantity'] / $pack_size);
+					if ($quantity_packs < 1 && $cart['quantity'] > 0) {
+						$quantity_packs = 1;
+					}
+					$quantity_for_total = $quantity_packs;
+				}
+				// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки)
+				
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
 					'product_id'      => $product_query->row['product_id'],
@@ -254,8 +289,10 @@ class Cart {
 					'minimum'         => $product_query->row['minimum'],
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,
-					'price'           => ($price + $option_price),
-					'total'           => ($price + $option_price) * $cart['quantity'],
+					'price'           => $price_converted, // Конвертована ціна в поточній валюті
+					'total'           => $price_converted * $quantity_for_total,
+					'sell_by_pack'    => $sell_by_pack,
+					'pack_size'       => $pack_size,
 					'reward'          => $reward * $cart['quantity'],
 					'points'          => ($product_query->row['points'] ? ($product_query->row['points'] + $option_points) * $cart['quantity'] : 0),
 					'tax_class_id'    => $product_query->row['tax_class_id'],
@@ -323,8 +360,10 @@ class Cart {
 
 	public function getSubTotal() {
 		$total = 0;
+		
+		$products = $this->getProducts();
 
-		foreach ($this->getProducts() as $product) {
+		foreach ($products as $product) {
 			$total += $product['total'];
 		}
 
@@ -338,11 +377,22 @@ class Cart {
 			if ($product['tax_class_id']) {
 				$tax_rates = $this->tax->getRates($product['price'], $product['tax_class_id']);
 
+				// ВАЖЛИВО: Для товарів що продаються упаковками, використовуємо кількість упаковок
+				$quantity_for_tax = $product['quantity'];
+				if (isset($product['sell_by_pack']) && $product['sell_by_pack'] && isset($product['pack_size']) && $product['pack_size'] > 0) {
+					// Товар продається упаковками: використовуємо кількість упаковок для розрахунку податків
+					$quantity_packs = (int)floor($product['quantity'] / $product['pack_size']);
+					if ($quantity_packs < 1 && $product['quantity'] > 0) {
+						$quantity_packs = 1;
+					}
+					$quantity_for_tax = $quantity_packs;
+				}
+
 				foreach ($tax_rates as $tax_rate) {
 					if (!isset($tax_data[$tax_rate['tax_rate_id']])) {
-						$tax_data[$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * $product['quantity']);
+						$tax_data[$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * $quantity_for_tax);
 					} else {
-						$tax_data[$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * $product['quantity']);
+						$tax_data[$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * $quantity_for_tax);
 					}
 				}
 			}
@@ -352,13 +402,18 @@ class Cart {
 	}
 
 	public function getTotal() {
-		$total = 0;
-
-		foreach ($this->getProducts() as $product) {
-			$total += $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'];
+		// ВАЖЛИВО: Використовуємо getSubTotal(), який правильно враховує total з getProducts()
+		// (який вже враховує кількість упаковок для товарів що продаються упаковками)
+		// та додаємо податки через getTaxes()
+		$subtotal = $this->getSubTotal();
+		$taxes = $this->getTaxes();
+		$tax_total = 0;
+		
+		foreach ($taxes as $tax) {
+			$tax_total += $tax;
 		}
-
-		return $total;
+		
+		return $subtotal + $tax_total;
 	}
 
 	public function countProducts() {

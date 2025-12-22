@@ -15,11 +15,7 @@
     {% set class = 'col-sm-12' %}
     {% endif %}
     <div id="content" class="{{ class }}">{{ content_top }}
-      <h1 class="page-title">{{ heading_title }}
-       {% if weight %}
-        &nbsp;({{ weight }})
-        {% endif %}
-      </h1>
+      <h1 class="page-title">{{ heading_title }}</h1>
        {% if attention %}
       <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ attention }}
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -53,16 +49,67 @@
                       {% if product.recurring %} <br />
                       <span class="label label-info">{{ text_recurring_item }}</span> <small>{{ product.recurring }}</small> {% endif %}</td></tr>
         <tr><td class="text-center">{{ column_model }}</td><td class="text-center">{{ product.model }}</td></tr>
-    <tr><td class="text-center">{{ column_quantity }}</td>
+        <tr><td class="text-center">{{ column_quantity }}</td>
     <td class="text-center"><div class="input-group btn-block" style="max-width: 200px;">
-                      <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" size="1" class="form-control" />
+                      {# Перевіряємо чи товар продається упаковками #}
+                      {% if product.quantity_packs is defined and product.quantity_packs > 0 %}
+                        {% set packs_count = product.quantity_packs %}
+                        {% set pack_word = 'упаковка' %}
+                        {% if packs_count > 1 and packs_count < 5 %}
+                          {% set pack_word = 'упаковки' %}
+                        {% elseif packs_count >= 5 %}
+                          {% set pack_word = 'упаковок' %}
+                        {% endif %}
+                        <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ packs_count }}" size="1" class="form-control" />
+                        <span style="display: block; font-size: 0.85em; color: #666; margin-top: 5px;">
+                          ({{ product.quantity }} шт. = {{ packs_count }} {{ pack_word }})
+                        </span>
+                      {% elseif product.sell_by_pack is defined and product.sell_by_pack and product.pack_size is defined and product.pack_size > 0 %}
+                        {% set calculated_packs = (product.quantity / product.pack_size)|round(0, 'floor') %}
+                        {% if calculated_packs < 1 and product.quantity > 0 %}{% set calculated_packs = 1 %}{% endif %}
+                        {% set pack_word = 'упаковка' %}
+                        {% if calculated_packs > 1 and calculated_packs < 5 %}
+                          {% set pack_word = 'упаковки' %}
+                        {% elseif calculated_packs >= 5 %}
+                          {% set pack_word = 'упаковок' %}
+                        {% endif %}
+                        <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ calculated_packs }}" size="1" class="form-control" />
+                        <span style="display: block; font-size: 0.85em; color: #666; margin-top: 5px;">
+                          ({{ product.quantity }} шт. = {{ calculated_packs }} {{ pack_word }})
+                        </span>
+                      {% else %}
+                        <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" size="1" class="form-control" />
+                      {% endif %}
                       <span class="input-group-btn">
                       <button type="submit"  title="{{ button_update }}" class="btn btn-primary"><i class="fa fa-refresh"></i></button>
                       <button type="button" title="{{ button_remove }}" class="btn btn-danger" onclick="cart.remove('{{ product.cart_id }}');"><i class="fa fa-times-circle"></i></button>
                       </span></div></td></tr>
                   <tr>
                   <td class="text-center">{{ column_price }}</td>
-                  <td class="text-center">{{ product.price }}</td>
+                  <td class="text-center">
+                    {% if product.quantity_packs is defined and product.quantity_packs > 0 %}
+                      {% if product.price_per_pack is defined and product.price_per_pack %}
+                        {{ product.price_per_pack }} <span style="font-size: 0.85em; color: #666;">(за упаковку {{ product.pack_size }} шт.)</span>
+                        {% if product.price_per_unit_formatted is defined and product.price_per_unit_formatted %}
+                          <br><span style="font-size: 0.8em; color: #999;">Одна штука: {{ product.price_per_unit_formatted }}</span>
+                        {% endif %}
+                      {% else %}
+                        {{ product.price }}
+                      {% endif %}
+                    {% elseif product.sell_by_pack is defined and product.sell_by_pack and product.pack_size is defined and product.pack_size > 0 %}
+                      {% if product.price_per_pack is defined and product.price_per_pack %}
+                        {{ product.price_per_pack }} <span style="font-size: 0.85em; color: #666;">(за упаковку {{ product.pack_size }} шт.)</span>
+                        {% if product.price_per_unit_formatted is defined and product.price_per_unit_formatted %}
+                          <br><span style="font-size: 0.8em; color: #999;">Одна штука: {{ product.price_per_unit_formatted }}</span>
+                        {% endif %}
+                      {% else %}
+                        {{ product.price }}
+                      {% endif %}
+                    {% else %}
+                      <!-- DEBUG: product.price={{ product.price }}, sell_by_pack={{ product.sell_by_pack|default('N/A') }}, pack_size={{ product.pack_size|default('N/A') }} -->
+                      {{ product.price }}
+                    {% endif %}
+                  </td>
                   </tr>
                   <tr>
                   <td class="text-center">{{ column_total }}</td>
@@ -125,7 +172,34 @@
                 <span class="label label-info">{{ text_recurring_item }}</span> <small>{{ product.recurring }}</small> {% endif %}</td>
               <td class="text-left">{{ product.model }}</td>
               <td class="text-left"><div class="input-group btn-block" style="max-width: 200px;">
-                  <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" size="1" class="form-control" />
+                  {% if product.quantity_packs is defined and product.quantity_packs > 0 %}
+                    {% set packs_count = product.quantity_packs %}
+                    {% set pack_word = 'упаковка' %}
+                    {% if packs_count > 1 and packs_count < 5 %}
+                      {% set pack_word = 'упаковки' %}
+                    {% elseif packs_count >= 5 %}
+                      {% set pack_word = 'упаковок' %}
+                    {% endif %}
+                    <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ packs_count }}" size="1" class="form-control" />
+                    <span style="display: block; font-size: 0.85em; color: #666; margin-top: 5px;">
+                      ({{ product.quantity }} шт. = {{ packs_count }} {{ pack_word }})
+                    </span>
+                  {% elseif product.sell_by_pack is defined and product.sell_by_pack and product.pack_size is defined and product.pack_size > 0 %}
+                    {% set calculated_packs = (product.quantity / product.pack_size)|round(0, 'floor') %}
+                    {% if calculated_packs < 1 and product.quantity > 0 %}{% set calculated_packs = 1 %}{% endif %}
+                    {% set pack_word = 'упаковка' %}
+                    {% if calculated_packs > 1 and calculated_packs < 5 %}
+                      {% set pack_word = 'упаковки' %}
+                    {% elseif calculated_packs >= 5 %}
+                      {% set pack_word = 'упаковок' %}
+                    {% endif %}
+                    <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ calculated_packs }}" size="1" class="form-control" />
+                    <span style="display: block; font-size: 0.85em; color: #666; margin-top: 5px;">
+                      ({{ product.quantity }} шт. = {{ calculated_packs }} {{ pack_word }})
+                    </span>
+                  {% else %}
+                    <input type="text" name="quantity[{{ product.cart_id }}]" value="{{ product.quantity }}" size="1" class="form-control" />
+                  {% endif %}
                   <span class="input-group-btn">
                   <button type="submit"  title="{{ button_update }}" class="btn btn-primary"><i class="fa fa-refresh"></i></button>
                   <button type="button" title="{{ button_remove }}" class="btn btn-danger" onclick="cart.remove('{{ product.cart_id }}');"><i class="fa fa-times-circle"></i></button>
@@ -153,13 +227,6 @@
           </table>
         </div>
       </form>
-      {% if modules %}
-      <h3>{{ text_next }}</h3>
-      <p>{{ text_next_choice }}</p>
-      <div class="panel-group" id="accordion"> {% for module in modules %}
-        {{ module }}
-        {% endfor %} </div>
-      {% endif %} <br />
       <div class="row">
         <div class="col-sm-4 col-sm-offset-8">
           <table class="table table-bordered">

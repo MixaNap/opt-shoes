@@ -52,12 +52,37 @@ class ControllerCheckoutCart extends Controller {
 
 			$this->load->model('tool/image');
 			$this->load->model('tool/upload');
+			$this->load->model('catalog/product');
 
 			$data['products'] = array();
 
 			$products = $this->cart->getProducts();
 
 			foreach ($products as $product) {
+				// Отримуємо інформацію про товар з БД для перевірки продажу упаковками
+				// Отримуємо базову ціну з БД (в USD) для правильного розрахунку податків
+				$product_info_query = $this->db->query("SELECT price, sell_by_pack, pack_size, tax_class_id FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product['product_id'] . "'");
+				$product_base_price = $product_info_query->num_rows ? (float)$product_info_query->row['price'] : 0;
+				$sell_by_pack = $product_info_query->num_rows ? (int)$product_info_query->row['sell_by_pack'] : 0;
+				$pack_size = $product_info_query->num_rows ? (int)$product_info_query->row['pack_size'] : 0;
+				$tax_class_id = $product_info_query->num_rows ? $product_info_query->row['tax_class_id'] : 0;
+				$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+				
+				// Перевіряємо чи отримали дані про товар
+				if ($product_info && is_array($product_info)) {
+					$sell_by_pack = isset($product_info['sell_by_pack']) ? (int)$product_info['sell_by_pack'] : 0;
+					$pack_size = isset($product_info['pack_size']) ? (int)$product_info['pack_size'] : 0;
+				} else {
+					// Якщо не вдалося отримати дані, спробуємо отримати напряму з БД
+					$query = $this->db->query("SELECT sell_by_pack, pack_size FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product['product_id'] . "'");
+					if ($query->num_rows) {
+						$sell_by_pack = isset($query->row['sell_by_pack']) ? (int)$query->row['sell_by_pack'] : 0;
+						$pack_size = isset($query->row['pack_size']) ? (int)$query->row['pack_size'] : 0;
+					} else {
+						$sell_by_pack = 0;
+						$pack_size = 0;
+					}
+				}
 				$product_total = 0;
 
 				foreach ($products as $product_2) {
@@ -97,12 +122,73 @@ class ControllerCheckoutCart extends Controller {
 					);
 				}
 
+				// Якщо товар продається упаковками, розраховуємо кількість упаковок та ціну за упаковку
+				// Це потрібно робити ЗАВЖДИ, незалежно від того, чи залогінений користувач
+				$quantity_packs = 0;
+				$price_per_pack = '';
+				$price_per_unit_formatted = '';
+				
+				if ($sell_by_pack && $pack_size > 0) {
+					// Розраховуємо кількість упаковок (округлюємо вниз)
+					// $product['quantity'] - це кількість штук в кошику
+					// $pack_size - це кількість штук в одній упаковці
+					// $quantity_packs - це кількість упаковок
+					$quantity_packs = (int)floor($product['quantity'] / $pack_size);
+					// Якщо кількість упаковок = 0, встановлюємо мінімум 1
+					if ($quantity_packs < 1 && $product['quantity'] > 0) {
+						$quantity_packs = 1;
+					}
+				} else {
+					$quantity_packs = 0; // Для товарів що продаються поштучно
+				}
+				
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
+					// ВАЖЛИВО: Використовуємо базову ціну з БД (в USD) для правильного розрахунку податків
+					// Спочатку розраховуємо податки з базової ціни (в USD)
+					$base_currency = 'USD'; // Ціни в БД зберігаються в USD
+					$current_currency = $this->session->data['currency'];
 					
-					$price = $this->currency->format($unit_price, $this->session->data['currency']);
-					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+					// Якщо базова ціна з БД = 0, використовуємо ціну з $product (вже конвертовану)
+					if ($product_base_price > 0) {
+						$price_with_tax_base = $this->tax->calculate($product_base_price, $tax_class_id, $this->config->get('config_tax'));
+						// Потім конвертуємо результат з USD в поточну валюту (UAH)
+						$price_with_tax = $this->currency->convert($price_with_tax_base, $base_currency, $current_currency);
+					} else {
+						// Fallback: використовуємо вже конвертовану ціну з $product
+						// $product['price'] вже конвертована з USD в UAH в cart->getProducts()
+						$price_with_tax = $this->tax->calculate($product['price'], $tax_class_id, $this->config->get('config_tax'));
+					}
+					
+					// Отримуємо налаштування валюти для форматування
+					$current_currency_code = $this->session->data['currency'];
+					$symbol_left = $this->currency->getSymbolLeft($current_currency_code);
+					$symbol_right = $this->currency->getSymbolRight($current_currency_code);
+					$decimal_place = $this->currency->getDecimalPlace($current_currency_code);
+					
+					// Функція для форматування вже конвертованої ціни (без множення на курс)
+					$format_price = function($amount) use ($symbol_left, $symbol_right, $decimal_place) {
+						$amount = round((float)$amount, (int)$decimal_place);
+						$formatted = number_format($amount, (int)$decimal_place, '.', ' ');
+						return $symbol_left . $formatted . $symbol_right;
+					};
+					
+					if ($sell_by_pack && $pack_size > 0) {
+						// Ціна за упаковку (вже конвертована в UAH, з податками)
+						$price_per_pack = $format_price($price_with_tax);
+						// Ціна за штуку = ціна за упаковку / розмір упаковки (вже конвертована в UAH)
+						$price_per_unit = $price_with_tax / $pack_size;
+						$price_per_unit_formatted = $format_price($price_per_unit);
+						// Ціна за упаковку для відображення
+						$price = $price_per_pack;
+						// Загальна вартість = кількість упаковок * ціна за упаковку (вже конвертована в UAH)
+						$total = $format_price($price_with_tax * $quantity_packs);
+					} else {
+						// Для товарів що продаються поштучно
+						// Використовуємо вже конвертовану ціну (в UAH)
+						$price = $format_price($price_with_tax);
+						$total = $format_price($price_with_tax * $product['quantity']);
+					}
 				} else {
 					$price = false;
 					$total = false;
@@ -138,6 +224,11 @@ class ControllerCheckoutCart extends Controller {
 					'option'    => $option_data,
 					'recurring' => $recurring,
 					'quantity'  => $product['quantity'],
+					'quantity_packs' => isset($quantity_packs) && $quantity_packs > 0 ? (int)$quantity_packs : 0,
+					'sell_by_pack' => isset($sell_by_pack) ? (int)$sell_by_pack : 0,
+					'pack_size' => isset($pack_size) ? (int)$pack_size : 0,
+					'price_per_pack' => isset($price_per_pack) ? $price_per_pack : '',
+					'price_per_unit_formatted' => isset($price_per_unit_formatted) ? $price_per_unit_formatted : '',
 					'stock'     => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 					'reward'    => ($product['reward'] ? sprintf($this->language->get('text_points'), $product['reward']) : ''),
 					'price'     => $price,
@@ -207,9 +298,11 @@ class ControllerCheckoutCart extends Controller {
 			$data['totals'] = array();
 
 			foreach ($totals as $total) {
+				// ВАЖЛИВО: $total['value'] вже конвертована в поточну валюту (UAH)
+				// Використовуємо $value = 1, щоб не множити на курс повторно
 				$data['totals'][] = array(
 					'title' => $total['title'],
-					'text'  => $this->currency->format($total['value'], $this->session->data['currency'])
+					'text'  => $this->currency->format($total['value'], $this->session->data['currency'], 1)
 				);
 			}
 
@@ -275,15 +368,25 @@ class ControllerCheckoutCart extends Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
+			// Перевірка для товарів що продаються упаковками
+			$sell_by_pack = isset($product_info['sell_by_pack']) ? (int)$product_info['sell_by_pack'] : 0;
+			$pack_size = isset($product_info['pack_size']) ? (int)$product_info['pack_size'] : 0;
+			
+			// Отримуємо кількість з POST запиту
+			// Спочатку перевіряємо quantity (воно має містити кількість штук після оновлення JavaScript)
 			if (isset($this->request->post['quantity'])) {
 				$quantity = (int)$this->request->post['quantity'];
 			} else {
 				$quantity = 1;
 			}
-
-			// Перевірка для товарів що продаються упаковками
-			$sell_by_pack = isset($product_info['sell_by_pack']) ? (int)$product_info['sell_by_pack'] : 0;
-			$pack_size = isset($product_info['pack_size']) ? (int)$product_info['pack_size'] : 0;
+			
+			// Якщо товар продається упаковками і передано quantity_packs, конвертуємо в штуки
+			// (на випадок якщо JavaScript не оновив quantity)
+			if ($sell_by_pack && $pack_size > 0 && isset($this->request->post['quantity_packs']) && !isset($this->request->post['quantity'])) {
+				$quantity_packs = (int)$this->request->post['quantity_packs'];
+				if ($quantity_packs < 1) $quantity_packs = 1;
+				$quantity = $quantity_packs * $pack_size;
+			}
 			
 			if ($sell_by_pack && $pack_size > 0) {
 				// Перевіряємо що кількість кратна розміру упаковки
@@ -429,6 +532,9 @@ class ControllerCheckoutCart extends Controller {
 						$pack_size = isset($product_info['pack_size']) ? (int)$product_info['pack_size'] : 0;
 						
 						if ($sell_by_pack && $pack_size > 0) {
+							// Користувач вводить кількість упаковок, конвертуємо в штуки
+							$quantity = $quantity * $pack_size;
+							
 							// Перевіряємо що кількість кратна розміру упаковки
 							if ($quantity % $pack_size !== 0) {
 								$json['error'][$key] = sprintf('Товар продається упаковками по %d шт. Кількість має бути кратною %d.', $pack_size, $pack_size);

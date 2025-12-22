@@ -318,15 +318,25 @@
             <div class="form-group qty">
               {% if stock_qty =='true' %} 
               <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12 op-box qty-plus-minus">
-                  <button type="button" class="form-control pull-left btn-number btnminus" disabled="disabled" data-type="minus" data-field="quantity"></button>
-                {# <label class="control-label" for="input-quantity">{{ entry_qty }}</label> #}
-                 <input id="input-quantity" type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control input-number pull-left" />
+                  {% if sell_by_pack and pack_size > 0 %}
+                  {# Для товарів що продаються упаковками: відображаємо кількість упаковок #}
+                  <button type="button" class="form-control pull-left btn-number btnminus" disabled="disabled" data-type="minus" data-field="quantity_packs"></button>
+                  <input id="input-quantity" type="text" name="quantity_packs" value="1" size="2" class="form-control input-number pull-left" />
+                  <input type="hidden" name="quantity" id="quantity-actual" value="{{ pack_size }}" />
+                  {% else %}
+                  <button type="button" class="form-control pull-left btn-number btnminus" {% if minimum <= 1 %}disabled="disabled"{% endif %} data-type="minus" data-field="quantity"></button>
+                  <input id="input-quantity" type="text" name="quantity" value="{{ minimum }}" size="2" class="form-control input-number pull-left" />
+                  {% endif %}
                   <input type="hidden" name="product_id" value="{{ product_id }}" />
                   {% if sell_by_pack and pack_size > 0 %}
                   <input type="hidden" name="pack_size" id="pack-size-value" value="{{ pack_size }}" />
                   <input type="hidden" name="sell_by_pack" value="1" />
                   {% endif %}
+                   {% if sell_by_pack and pack_size > 0 %}
+                   <button type="button" class="form-control pull-left btn-number btnplus" data-type="plus" data-field="quantity_packs"></button>
+                   {% else %}
                    <button type="button" class="form-control pull-left btn-number btnplus" data-type="plus" data-field="quantity"></button>
+                   {% endif %}
                    </div>
               
               <button type="button" id="button-cart" data-loading-text="{{ text_loading }}" class="btn btn-primary btn-lg btn-block">{{ button_cart }}</button>
@@ -337,15 +347,40 @@
           </div>
           
           {# Відображення вартості обраної кількості - після блоку з кількістю та кнопкою купити #}
+          {% if sell_by_pack and pack_size > 0 %}
+            {% if price_per_pack_numeric is defined and price_per_pack_numeric is not null and price_per_pack_numeric != false and price_per_pack_numeric > 0 %}
+              {% set pack_price = price_per_pack_numeric %}
+            {% elseif price_numeric is defined and price_numeric %}
+              {% set pack_price = price_numeric %}
+            {% else %}
+              {% set pack_price = 0 %}
+            {% endif %}
+            {% set unit_price = price_per_unit_numeric ? price_per_unit_numeric : 0 %}
+          {% else %}
+            {% set pack_price = 0 %}
+            {% if price_per_unit_numeric is defined and price_per_unit_numeric is not null and price_per_unit_numeric != false and price_per_unit_numeric > 0 %}
+              {% set unit_price = price_per_unit_numeric %}
+            {% elseif price_numeric is defined and price_numeric %}
+              {% set unit_price = price_numeric %}
+            {% else %}
+              {% set unit_price = 0 %}
+            {% endif %}
+          {% endif %}
           <div id="quantity-total-price" 
                style="margin-top: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px; clear: both; {% if minimum <= 0 %}display: none;{% endif %}"
                data-sell-by-pack="{% if sell_by_pack and pack_size > 0 %}1{% else %}0{% endif %}"
                data-pack-size="{{ pack_size }}"
-               data-price-per-pack="{{ price_per_pack_numeric|default(price_per_unit_numeric) }}"
-               data-price-per-unit="{{ price_per_unit_numeric }}">
+               data-price-per-pack="{{ pack_price|replace({' ': ''}) }}"
+               data-price-per-unit="{{ unit_price|replace({' ': ''}) }}">
             <div style="font-size: 1.1em; color: #333;">
               <strong>Вартість: <span id="total-price-amount">0</span></strong>
             </div>
+            {% if sell_by_pack and pack_size > 0 %}
+            <!-- Debug: pack_price={{ pack_price }}, price_per_pack_numeric={{ price_per_pack_numeric }}, price_numeric={{ price_numeric }}, special_numeric={{ special_numeric }}, price={{ price }} -->
+            <script>
+            console.log('Twig Debug: pack_price={{ pack_price }}, price_per_pack_numeric={{ price_per_pack_numeric }}, price_numeric={{ price_numeric }}');
+            </script>
+            {% endif %}
           </div>
             </div>
 
@@ -616,17 +651,59 @@ $('select[name=\'recurring_id\'], input[name="quantity"]').change(function(){
 });
 </script> 
 <script type="text/javascript">
-$('#button-cart').on('click', function() {
+// Реєструємо обробник після завантаження DOM
+$(document).ready(function() {
+  // Видаляємо всі попередні обробники подій для button-cart
+  $('#button-cart').off('click');
+  
+  // Реєструємо наш обробник події
+  $('#button-cart').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Debug: Button clicked!');
+  
+  // Для товарів що продаються упаковками: перетворюємо кількість упаковок на кількість пар перед відправкою
+  var sellByPack = parseInt($('input[name="sell_by_pack"]').val()) || 0;
+  var packSize = parseInt($('input[name="pack_size"]').val()) || 0;
+  
+  console.log('Debug: sellByPack=', sellByPack, 'packSize=', packSize);
+  
+  if (sellByPack && packSize > 0) {
+    // Оновлюємо фактичну кількість перед відправкою
+    var packs = parseInt($('input[name="quantity_packs"]').val()) || 1;
+    if (packs < 1) packs = 1;
+    var actualQuantity = packs * packSize;
+    // Оновлюємо поле quantity (воно має містити кількість штук для кошика)
+    var quantityField = $('input[name="quantity"]');
+    console.log('Debug: Found quantity field:', quantityField.length, 'current value:', quantityField.val());
+    quantityField.val(actualQuantity);
+    console.log('Debug: Updated quantity field to:', quantityField.val());
+    
+    // Приховуємо quantity_packs перед відправкою, щоб не передавати його в кошик
+    $('input[name="quantity_packs"]').prop('disabled', true);
+    console.log('Debug: packs=', packs, 'packSize=', packSize, 'actualQuantity=', actualQuantity);
+  }
+  
+  // Формуємо дані для відправки (після оновлення quantity)
+  var formData = $('#product input[type=\'text\']:not([name="quantity_packs"]), #product input[type=\'hidden\'], #product input[type=\'radio\']:checked, #product input[type=\'checkbox\']:checked, #product select, #product textarea').serialize();
+  console.log('Debug: Form data being sent:', formData);
+  console.log('Debug: Quantity in form data:', $('input[name="quantity"]').val());
+  
   $.ajax({
     url: 'index.php?route=checkout/cart/add',
     type: 'post',
-    data: $('#product input[type=\'text\'], #product input[type=\'hidden\'], #product input[type=\'radio\']:checked, #product input[type=\'checkbox\']:checked, #product select, #product textarea'),
+    data: formData,
     dataType: 'json',
     beforeSend: function() {
       $('#button-cart').button('loading');
     },
     complete: function() {
       $('#button-cart').button('reset');
+      // Повертаємо quantity_packs після відправки
+      if (sellByPack && packSize > 0) {
+        $('input[name="quantity_packs"]').prop('disabled', false);
+      }
     },
     success: function(json) {
       $('.alert-dismissible, .text-danger').remove();
@@ -705,7 +782,8 @@ $('#button-cart').on('click', function() {
             alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
         }
   });
-});
+  }); // Закриваємо обробник події click
+}); // Закриваємо $(document).ready()
 </script> 
 <script type="text/javascript">
 $('.date').datetimepicker({
@@ -922,61 +1000,71 @@ $('#custom_tab a').tabs();
 <script type="text/javascript">
     //plugin bootstrap minus and plus
     $(document).ready(function() {
-    $('.btn-number').click(function(e){
-    e.preventDefault();
-    var fieldName = $(this).attr('data-field');
-    var type = $(this).attr('data-type');
-    var input = $("input[name='" + fieldName + "']");
-    var currentVal = parseInt(input.val());
-    if (!isNaN(currentVal)) {
-    if (type == 'minus') {
-    var minValue = parseInt(input.attr('min'));
-    if (!minValue) minValue = 1;
-    if (currentVal > minValue) {
-    input.val(currentVal - 1).change();
+    // Перевіряємо чи товар продається упаковками
+    var sellByPack = parseInt($('input[name="sell_by_pack"]').val()) || 0;
+    var packSize = parseInt($('input[name="pack_size"]').val()) || 0;
+    var isPackProduct = (sellByPack && packSize > 0);
+    
+    // Функція для оновлення фактичної кількості (пар) з кількості упаковок
+    function updateActualQuantity() {
+      if (isPackProduct && packSize > 0) {
+        var packs = parseInt($('input[name="quantity_packs"]').val()) || 1;
+        if (packs < 1) packs = 1;
+        var actualQty = packs * packSize;
+        $('#quantity-actual').val(actualQty);
+      }
     }
-    if (parseInt(input.val()) == minValue) {
-    $(this).attr('disabled', true);
-    }
-
-    } else if (type == 'plus') {
-    var maxValue = parseInt(input.attr('max'));
-    if (!maxValue) maxValue = 999;
-    if (currentVal < maxValue) {
-    input.val(currentVal + 1).change();
-    }
-    if (parseInt(input.val()) == maxValue) {
-    $(this).attr('disabled', true);
-    }
-
-    }
-    } else {
-    input.val(0);
-    }
-    });
-    $('.input-number').focusin(function(){
-    $(this).data('oldValue', $(this).val());
-    });
+    
     // Функція для розрахунку та відображення вартості
     function updateTotalPrice() {
-      var quantity = parseInt($('#input-quantity').val()) || 0;
       var priceBlock = $('#quantity-total-price');
       var sellByPack = parseInt(priceBlock.data('sell-by-pack')) || 0;
       var packSize = parseInt(priceBlock.data('pack-size')) || 0;
-      var pricePerPack = parseFloat(priceBlock.data('price-per-pack')) || 0;
-      var pricePerUnit = parseFloat(priceBlock.data('price-per-unit')) || 0;
+      var pricePerPack = parseFloat(priceBlock.attr('data-price-per-pack')) || 0;
+      var pricePerUnit = parseFloat(priceBlock.attr('data-price-per-unit')) || 0;
+      
+      // Відлагодження
+      console.log('Debug: sellByPack=', sellByPack, 'packSize=', packSize, 'pricePerPack=', pricePerPack, 'pricePerUnit=', pricePerUnit);
+      
+      var quantity = 0;
+      if (sellByPack && packSize > 0) {
+        // Для товарів що продаються упаковками: беремо кількість упаковок
+        quantity = parseInt($('input[name="quantity_packs"]').val()) || 1;
+      } else {
+        // Для товарів що продаються поштучно
+        quantity = parseInt($('#input-quantity').val()) || 1;
+        if (quantity < 1) quantity = 1;
+      }
+      
+      console.log('Debug: quantity=', quantity);
       
       if (quantity > 0) {
         var totalPrice = 0;
         
-        if (sellByPack && packSize > 0 && pricePerPack > 0) {
-          // Розраховуємо кількість упаковок
-          var packs = quantity / packSize;
-          totalPrice = pricePerPack * packs;
-        } else if (pricePerUnit > 0) {
+        if (sellByPack && packSize > 0) {
+          // Для товарів що продаються упаковками
+          if (pricePerPack > 0) {
+            // Використовуємо ціну за упаковку
+            totalPrice = pricePerPack * quantity;
+            console.log('Debug: Using pricePerPack:', pricePerPack, '* quantity:', quantity, '=', totalPrice);
+          } else {
+            // Якщо ціна за упаковку не встановлена, використовуємо ціну за пару * розмір упаковки
+            totalPrice = (pricePerUnit * packSize) * quantity;
+            console.log('Debug: Using pricePerUnit * packSize:', pricePerUnit, '*', packSize, '* quantity:', quantity, '=', totalPrice);
+          }
+        } else {
           // Для товарів що продаються поштучно
-          totalPrice = pricePerUnit * quantity;
+          if (pricePerUnit > 0) {
+            totalPrice = pricePerUnit * quantity;
+            console.log('Debug: Using pricePerUnit:', pricePerUnit, '* quantity:', quantity, '=', totalPrice);
+          } else if (pricePerPack > 0) {
+            // Fallback: якщо pricePerUnit не встановлено, використовуємо pricePerPack
+            totalPrice = pricePerPack * quantity;
+            console.log('Debug: Using pricePerPack (fallback):', pricePerPack, '* quantity:', quantity, '=', totalPrice);
+          }
         }
+        
+        console.log('Debug: totalPrice=', totalPrice);
         
         if (totalPrice > 0) {
           // Форматуємо ціну
@@ -991,57 +1079,87 @@ $('#custom_tab a').tabs();
       }
     }
     
-    $('.input-number').change(function() {
-
-    var minValue = parseInt($(this).attr('min'));
-    var maxValue = parseInt($(this).attr('max'));
-    if (!minValue) minValue = 1;
-    if (!maxValue) maxValue = 999;
-    var valueCurrent = parseInt($(this).val());
-    var name = $(this).attr('name');
-    
-    // Перевірка для товарів що продаються упаковками
-    var packSize = parseInt($('input[name="pack_size"]').val());
-    var sellByPack = parseInt($('input[name="sell_by_pack"]').val());
-    if (sellByPack && packSize > 0) {
-      // Перевіряємо що кількість кратна розміру упаковки
-      if (valueCurrent % packSize !== 0) {
-        // Округлюємо до найближчої упаковки
-        var roundedValue = Math.ceil(valueCurrent / packSize) * packSize;
-        if (roundedValue < minValue) roundedValue = minValue;
-        $(this).val(roundedValue);
-        valueCurrent = roundedValue;
+    // Обробка кнопок +/-
+    $('.btn-number').click(function(e){
+      e.preventDefault();
+      var fieldName = $(this).attr('data-field');
+      var type = $(this).attr('data-type');
+      
+      var input;
+      if (isPackProduct) {
+        input = $("input[name='quantity_packs']");
+      } else {
+        input = $("input[name='" + fieldName + "']");
       }
-    }
-    
-    if (valueCurrent >= minValue) {
-    $(".btn-number[data-type='minus'][data-field='" + name + "']").removeAttr('disabled')
-    } else {
-    alert('Sorry, the minimum value was reached');
-    $(this).val($(this).data('oldValue'));
-    }
-    if (valueCurrent <= maxValue) {
-    $(".btn-number[data-type='plus'][data-field='" + name + "']").removeAttr('disabled')
-    } else {
-    alert('Sorry, the maximum value was reached');
-    $(this).val($(this).data('oldValue'));
-    }
-    
-    // Оновлюємо вартість при зміні кількості
-    updateTotalPrice();
+      
+      var currentVal = parseInt(input.val()) || 1;
+      var minValue = 1;
+      var maxValue = 999;
+      
+      if (!isNaN(currentVal)) {
+        if (type == 'minus') {
+          if (currentVal > minValue) {
+            input.val(currentVal - 1).change();
+          }
+          // Оновлюємо disabled для кнопки мінус
+          if (parseInt(input.val()) <= minValue) {
+            $(".btn-number[data-type='minus']").attr('disabled', true);
+          } else {
+            $(".btn-number[data-type='minus']").removeAttr('disabled');
+          }
+        } else if (type == 'plus') {
+          if (currentVal < maxValue) {
+            input.val(currentVal + 1).change();
+          }
+          // Оновлюємо disabled для кнопки мінус (якщо кількість > 1, то мінус активна)
+          if (parseInt(input.val()) > minValue) {
+            $(".btn-number[data-type='minus']").removeAttr('disabled');
+          }
+        }
+      } else {
+        input.val(minValue);
+      }
+      
+      // Оновлюємо фактичну кількість та вартість
+      updateActualQuantity();
+      updateTotalPrice();
     });
     
-    // Оновлюємо вартість при натисканні кнопок +/-
-    $('.btn-number').on('click', function() {
-      setTimeout(function() {
-        updateTotalPrice();
-      }, 100);
+    $('.input-number').focusin(function(){
+      $(this).data('oldValue', $(this).val());
+    });
+    
+    // Обробка зміни кількості вручну
+    $('.input-number').change(function() {
+      var minValue = 1;
+      var maxValue = 999;
+      var valueCurrent = parseInt($(this).val()) || minValue;
+      
+      // Перевірка мінімального та максимального значення
+      if (valueCurrent < minValue) {
+        valueCurrent = minValue;
+        $(this).val(minValue);
+      }
+      if (valueCurrent > maxValue) {
+        valueCurrent = maxValue;
+        $(this).val(maxValue);
+      }
+      
+      // Оновлюємо disabled для кнопок
+      if (valueCurrent <= minValue) {
+        $(".btn-number[data-type='minus']").attr('disabled', true);
+      } else {
+        $(".btn-number[data-type='minus']").removeAttr('disabled');
+      }
+      
+      // Оновлюємо фактичну кількість та вартість
+      updateActualQuantity();
+      updateTotalPrice();
     });
     
     // Оновлюємо вартість при завантаженні сторінки
-    $(document).ready(function() {
-      updateTotalPrice();
-    });
+    updateActualQuantity();
+    updateTotalPrice();
     $(".input-number").keydown(function (e) {
     // Allow: backspace, delete, tab, escape, enter and .
     if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 190]) !== - 1 ||
