@@ -99,22 +99,35 @@ header('Content-Type: text/html; charset=utf-8');
 echo "Starting deployment...\n";
 echo "========================================\n\n";
 
-// Список файлів для оновлення (тільки змінені файли системи упаковок)
+// Список файлів для оновлення
 $files_to_update = [
     // Адмін панель
     'admin/model/catalog/product.php',
     'admin/controller/catalog/product.php',
     'admin/view/template/catalog/product_form.twig',
+    'admin/language/uk-ua/common/footer.php',
     
     // Каталог
     'catalog/model/catalog/product.php',
     'catalog/controller/product/product.php',
     'catalog/controller/product/category.php',
     'catalog/controller/checkout/cart.php',
+    'catalog/controller/common/cart.php',
+    'catalog/model/extension/total/sub_total.php',
+    
+    // Мови
+    'catalog/language/uk-ua/common/footer.php',
+    'catalog/language/uk-ua/extension/module/webdigifytabs.php',
+    'catalog/language/ru-ru/extension/module/webdigifytabs.php',
     
     // Шаблони
     'catalog/view/theme/Crazy/template/product/product.twig',
     'catalog/view/theme/Crazy/template/product/category.twig',
+    'catalog/view/theme/Crazy/template/checkout/cart.twig',
+    'catalog/view/theme/Crazy/template/common/cart.twig',
+    
+    // Система
+    'system/library/cart/cart.php',
 ];
 
 $github_base = 'https://raw.githubusercontent.com/MixaNap/opt-shoes/main/';
@@ -140,30 +153,65 @@ foreach ($files_to_update as $file) {
 
 // Очищення кешу
 echo "\nClearing cache...\n";
-$cacheDir = $baseDir . '/storage/cache/';
-$modificationDir = $baseDir . '/storage/modification/';
+
+// Перевірка різних можливих шляхів до кешу
+$possibleCachePaths = [
+    $baseDir . '/system/storage/cache/',
+    $baseDir . '/storage/cache/',
+];
+
+$possibleModificationPaths = [
+    $baseDir . '/system/storage/modification/',
+    $baseDir . '/storage/modification/',
+];
 
 $cacheCleared = false;
 $modificationCleared = false;
 
-if (is_dir($cacheDir)) {
-    if (deleteDirectory($cacheDir)) {
-        mkdir($cacheDir, 0755, true);
+// Очищення кешу
+foreach ($possibleCachePaths as $cacheDir) {
+    if (is_dir($cacheDir)) {
+        // Видаляємо всі файли та папки всередині, але залишаємо саму директорію
+        $files = array_diff(scandir($cacheDir), ['.', '..', 'index.php']);
+        foreach ($files as $file) {
+            $filePath = $cacheDir . $file;
+            if (is_dir($filePath)) {
+                deleteDirectory($filePath);
+            } else {
+                @unlink($filePath);
+            }
+        }
         echo "<span class='success'>✓ Cache cleared</span>\n";
         $cacheCleared = true;
-    } else {
-        echo "<span class='error'>✗ Failed to clear cache</span>\n";
+        break;
     }
 }
 
-if (is_dir($modificationDir)) {
-    if (deleteDirectory($modificationDir)) {
-        mkdir($modificationDir, 0755, true);
+if (!$cacheCleared) {
+    echo "<span class='error'>✗ Cache directory not found</span>\n";
+}
+
+// Очищення модифікацій
+foreach ($possibleModificationPaths as $modificationDir) {
+    if (is_dir($modificationDir)) {
+        // Видаляємо всі файли та папки всередині, але залишаємо саму директорію
+        $files = array_diff(scandir($modificationDir), ['.', '..', 'index.php']);
+        foreach ($files as $file) {
+            $filePath = $modificationDir . $file;
+            if (is_dir($filePath)) {
+                deleteDirectory($filePath);
+            } else {
+                @unlink($filePath);
+            }
+        }
         echo "<span class='success'>✓ Modification cache cleared</span>\n";
         $modificationCleared = true;
-    } else {
-        echo "<span class='error'>✗ Failed to clear modification cache</span>\n";
+        break;
     }
+}
+
+if (!$modificationCleared) {
+    echo "<span class='error'>✗ Modification directory not found</span>\n";
 }
 
 echo "\n========================================\n";
@@ -193,4 +241,5 @@ if ($updated === count($files_to_update) && $cacheCleared && $modificationCleare
 </div>
 </body>
 </html>
+
 
