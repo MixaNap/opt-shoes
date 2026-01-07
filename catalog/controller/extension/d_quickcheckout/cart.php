@@ -191,50 +191,38 @@ class ControllerExtensionDQuickcheckoutCart extends Controller {
 
             // Display prices
             if (($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) {
-                // Для товарів що продаються упаковками, ціна в $product['price'] - це ціна за упаковку
-                // Потрібно розрахувати ціну за штуку для відображення
-                $unit_price = $product['price'];
-                if (isset($product['sell_by_pack']) && $product['sell_by_pack'] && isset($product['pack_size']) && $product['pack_size'] > 0) {
-                    // Розраховуємо ціну за штуку
-                    $unit_price = $product['price'] / $product['pack_size'];
-                }
-                
-                // Важливо: передаємо третій параметр $value = 1 щоб не множити на currency_value
-                // бо $unit_price вже в поточній валюті (UAH)
-                $price = $this->currency->format($this->tax->calculate($unit_price, $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], 1);
-            } else {
-                $price = false;
-            }
-
-            // Display prices
-            if (($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) {
-                // Використовуємо ту ж логіку що і в стандартному cart.php
-                // В cart.php: $unit_price = $this->tax->calculate($product['price'], ...) і потім $total = $unit_price * $product['quantity']
-                // Але для товарів що продаються упаковками потрібно врахувати кількість упаковок
-                
+                // ВАЖЛИВО: $product['price'] вже містить ціну за одиницю (з урахуванням знижок)
+                // Це розраховано в cart.php як: ціна за упаковку з БД / pack_size
                 $sell_by_pack = isset($product['sell_by_pack']) ? (int)$product['sell_by_pack'] : 0;
                 $pack_size = isset($product['pack_size']) ? (int)$product['pack_size'] : 0;
                 
-                // Розраховуємо unit_price (ціна за штуку або за упаковку з податком)
+                // Розраховуємо ціну за одиницю з податками
                 $unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
                 
-                // Визначаємо кількість для розрахунку total
-                $quantity_for_total = $product['quantity'];
+                // Для відображення ціни за шт. використовуємо ціну за одиницю
+                $price = $this->currency->format($unit_price, $this->session->data['currency'], 1);
                 
+                // Розраховуємо загальну вартість
                 if ($sell_by_pack && $pack_size > 0) {
-                    // Товар продається упаковками: використовуємо кількість упаковок
+                    // Товар продається упаковками
+                    // Розраховуємо кількість упаковок
                     $quantity_packs = (int)floor($product['quantity'] / $pack_size);
                     if ($quantity_packs < 1 && $product['quantity'] > 0) {
                         $quantity_packs = 1;
                     }
-                    $quantity_for_total = $quantity_packs;
+                    // Ціна за упаковку = ціна за одиницю * розмір упаковки
+                    $price_per_pack = $unit_price * $pack_size;
+                    // Загальна вартість = ціна за упаковку * кількість упаковок
+                    $total_price = $price_per_pack * $quantity_packs;
+                } else {
+                    // Товар продається поштучно
+                    // Загальна вартість = ціна за одиницю * кількість
+                    $total_price = $unit_price * $product['quantity'];
                 }
                 
-                // Розраховуємо total: unit_price * quantity_for_total (як в стандартному cart.php)
-                // Важливо: передаємо третій параметр $value = 1 щоб не множити на currency_value
-                // бо $unit_price вже в поточній валюті (UAH)
-                $total = $this->currency->format($unit_price * $quantity_for_total, $this->session->data['currency'], 1);
+                $total = $this->currency->format($total_price, $this->session->data['currency'], 1);
             } else {
+                $price = false;
                 $total = false;
             }
 
