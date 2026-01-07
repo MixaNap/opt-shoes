@@ -122,6 +122,9 @@ $files_to_update = [
     'catalog/model/extension/d_quickcheckout/order.php',
     'catalog/view/theme/default/template/extension/payment/cod.twig',
     
+    // Адмін-панель (виправлення відображення суми замовлень)
+    'admin/controller/sale/order.php',
+    
     // Мови
     'catalog/language/uk-ua/common/footer.php',
     'catalog/language/uk-ua/extension/module/webdigifytabs.php',
