@@ -125,8 +125,11 @@ class ControllerCommonCart extends Controller {
 					// Загальна вартість використовуємо з $product['total'], який вже правильно розрахований в cart.php
 					$total = $this->currency->format($product['total'], $this->session->data['currency'], 1);
 				} else {
+					// Для звичайних товарів: $unit_price вже містить податки
 					$price = $this->currency->format($unit_price, $this->session->data['currency'], 1);
-					$total = $this->currency->format($product['total'], $this->session->data['currency'], 1);
+					// Загальна вартість = ціна за одиницю з податками * кількість
+					$total_with_tax = $unit_price * $product['quantity'];
+					$total = $this->currency->format($total_with_tax, $this->session->data['currency'], 1);
 				}
 			} else {
 				$price = false;
