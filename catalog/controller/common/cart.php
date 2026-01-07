@@ -90,6 +90,7 @@ class ControllerCommonCart extends Controller {
 
 			// Display prices
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				// $product['price'] містить ціну за одиницю (з cart.php)
 				$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 				
 				// Якщо товар продається упаковками, розраховуємо кількість упаковок та ціну за упаковку
@@ -112,11 +113,12 @@ class ControllerCommonCart extends Controller {
 					$price_per_unit_formatted = $this->currency->format($price_per_unit_numeric, $this->session->data['currency'], 1);
 					// Ціна за упаковку
 					$price = $price_per_pack;
-					// Загальна вартість = кількість упаковок * ціна за упаковку
-					$total = $this->currency->format($price_per_pack_numeric * $quantity_for_total, $this->session->data['currency'], 1);
+					// Загальна вартість використовуємо з $product['total'], який вже правильно розрахований в cart.php
+					// cart.php розраховує: $price_converted * $quantity_for_total, де $quantity_for_total = кількість упаковок
+					$total = $this->currency->format($product['total'], $this->session->data['currency'], 1);
 				} else {
 					$price = $this->currency->format($unit_price, $this->session->data['currency'], 1);
-					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency'], 1);
+					$total = $this->currency->format($product['total'], $this->session->data['currency'], 1);
 				}
 			} else {
 				$price = false;
