@@ -120,6 +120,7 @@ $files_to_update = [
     'catalog/controller/extension/d_quickcheckout/confirm.php',
     'catalog/controller/extension/payment/cod.php',
     'catalog/model/extension/d_quickcheckout/order.php',
+    'catalog/view/theme/default/template/extension/payment/cod.twig',
     
     // Мови
     'catalog/language/uk-ua/common/footer.php',

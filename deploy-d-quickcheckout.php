@@ -92,6 +92,7 @@ $files_to_update = [
     'catalog/controller/extension/d_quickcheckout/confirm.php',
     'catalog/controller/extension/payment/cod.php',
     'catalog/model/extension/d_quickcheckout/order.php',
+    'catalog/view/theme/default/template/extension/payment/cod.twig',
 ];
 
 $github_base = 'https://raw.githubusercontent.com/MixaNap/opt-shoes/main/';
