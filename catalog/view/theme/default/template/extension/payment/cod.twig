@@ -15,12 +15,31 @@ $('#button-confirm').on('click', function() {
 			$('#button-confirm').button('reset');
 		},
 		success: function(json) {
+			console.log('COD Confirm Response:', json);
+			
+			if (json['error']) {
+				alert('Помилка: ' + json['error']);
+				if (json['debug']) {
+					console.log('Debug info:', json['debug']);
+				}
+				return;
+			}
+			
 			if (json['redirect']) {
 				location = json['redirect'];	
+			} else {
+				console.warn('No redirect URL in response:', json);
+				alert('Помилка: Не вдалося отримати URL для перенаправлення');
 			}
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
-			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			console.error('COD Confirm AJAX Error:', {
+				status: xhr.status,
+				statusText: xhr.statusText,
+				responseText: xhr.responseText,
+				thrownError: thrownError
+			});
+			alert('Помилка сервера: ' + thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 		}
 	});
 });
