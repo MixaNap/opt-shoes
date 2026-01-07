@@ -115,6 +115,12 @@ $files_to_update = [
     'catalog/controller/common/cart.php',
     'catalog/model/extension/total/sub_total.php',
     
+    // d_quickcheckout модуль (виправлення розрахунку цін)
+    'catalog/controller/extension/d_quickcheckout/cart.php',
+    'catalog/controller/extension/d_quickcheckout/confirm.php',
+    'catalog/controller/extension/payment/cod.php',
+    'catalog/model/extension/d_quickcheckout/order.php',
+    
     // Мови
     'catalog/language/uk-ua/common/footer.php',
     'catalog/language/uk-ua/extension/module/webdigifytabs.php',
