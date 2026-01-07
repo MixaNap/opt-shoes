@@ -104,26 +104,21 @@ class ControllerCommonCart extends Controller {
 					if ($quantity_packs < 1 && $product['quantity'] > 0) {
 						$quantity_packs = 1;
 					}
-					$quantity_for_total = $quantity_packs;
 					
-					// Розраховуємо ціну за упаковку на основі $product['total']
-					// $product['total'] = $price_converted * $quantity_for_total (з cart.php)
-					// Тому ціна за упаковку = $product['total'] / $quantity_for_total
-					if ($quantity_for_total > 0) {
-						$price_per_pack_numeric = $product['total'] / $quantity_for_total;
-					} else {
-						$price_per_pack_numeric = $unit_price * $pack_size;
-					}
+					// $product['price'] містить ціну за одиницю (з урахуванням знижок)
+					// $unit_price = ціна за одиницю з податками
+					// Ціна за упаковку = ціна за одиницю * розмір упаковки
+					$price_per_pack_numeric = $unit_price * $pack_size;
 					$price_per_pack = $this->currency->format($price_per_pack_numeric, $this->session->data['currency'], 1);
 					
-					// Ціна за одиницю = ціна за упаковку / розмір упаковки
-					$price_per_unit_numeric = $price_per_pack_numeric / $pack_size;
-					$price_per_unit_formatted = $this->currency->format($price_per_unit_numeric, $this->session->data['currency'], 1);
+					// Ціна за одиницю з податками (для відображення)
+					$price_per_unit_formatted = $this->currency->format($unit_price, $this->session->data['currency'], 1);
 					
-					// Ціна за упаковку
+					// Ціна за упаковку для відображення
 					$price = $price_per_pack;
-					// Загальна вартість використовуємо з $product['total'], який вже правильно розрахований в cart.php
-					$total = $this->currency->format($product['total'], $this->session->data['currency'], 1);
+					// Загальна вартість = кількість упаковок * ціна за упаковку з податками
+					$total_with_tax = $price_per_pack_numeric * $quantity_packs;
+					$total = $this->currency->format($total_with_tax, $this->session->data['currency'], 1);
 				} else {
 					// Для звичайних товарів: $unit_price вже містить податки
 					$price = $this->currency->format($unit_price, $this->session->data['currency'], 1);

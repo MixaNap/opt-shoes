@@ -165,15 +165,17 @@ class ControllerCheckoutCart extends Controller {
 					};
 					
 					if ($sell_by_pack && $pack_size > 0) {
-						// Ціна за упаковку (вже конвертована в UAH, з податками)
-						$price_per_pack = $format_price($price_with_tax);
-						// Ціна за штуку = ціна за упаковку / розмір упаковки (вже конвертована в UAH)
-						$price_per_unit = $price_with_tax / $pack_size;
-						$price_per_unit_formatted = $format_price($price_per_unit);
+						// $product['price'] містить ціну за одиницю (з урахуванням знижок)
+						// $price_with_tax = ціна за одиницю з податками
+						// Ціна за упаковку = ціна за одиницю * розмір упаковки
+						$price_per_pack_with_tax = $price_with_tax * $pack_size;
+						$price_per_pack = $format_price($price_per_pack_with_tax);
+						// Ціна за одиницю з податками (для відображення)
+						$price_per_unit_formatted = $format_price($price_with_tax);
 						// Ціна за упаковку для відображення
 						$price = $price_per_pack;
-						// Загальна вартість = кількість упаковок * ціна за упаковку (вже конвертована в UAH)
-						$total = $format_price($price_with_tax * $quantity_packs);
+						// Загальна вартість = кількість упаковок * ціна за упаковку з податками
+						$total = $format_price($price_per_pack_with_tax * $quantity_packs);
 					} else {
 						// Для товарів що продаються поштучно
 						// Використовуємо вже конвертовану ціну (в UAH)

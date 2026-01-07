@@ -264,6 +264,9 @@ class Cart {
 				// Але якщо товар продається упаковками, то потрібно використовувати кількість упаковок
 				$quantity_for_total = $cart['quantity'];
 				
+				// Зберігаємо ціну за одиницю (з урахуванням знижок) для подальшого використання
+				$price_per_unit_converted = $price_converted;
+				
 				if ($sell_by_pack && $pack_size > 0) {
 					// Товар продається упаковками: $price = ціна за одиницю (з урахуванням знижок)
 					// Для totals потрібно: ціна за упаковку * кількість упаковок
@@ -272,13 +275,16 @@ class Cart {
 					if ($quantity_packs < 1 && $cart['quantity'] > 0) {
 						$quantity_packs = 1;
 					}
-					// $price_converted - це ціна за одиницю зі знижкою, потрібно помножити на розмір упаковки
+					// $price_converted - це ціна за одиницю зі знижкою, розраховуємо ціну за упаковку
 					$price_per_pack = $price_converted * $pack_size;
 					$quantity_for_total = $quantity_packs;
 					// Для totals використовуємо ціну за упаковку * кількість упаковок
-					$price_converted = $price_per_pack;
+					$total_price = $price_per_pack * $quantity_for_total;
+				} else {
+					// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки), price_converted = ціна за одиницю
+					$quantity_for_total = $cart['quantity'];
+					$total_price = $price_converted * $quantity_for_total;
 				}
-				// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки), price_converted = ціна за одиницю
 				
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
@@ -293,8 +299,8 @@ class Cart {
 					'minimum'         => $product_query->row['minimum'],
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,
-					'price'           => $price_converted, // Конвертована ціна в поточній валюті
-					'total'           => $price_converted * $quantity_for_total,
+					'price'           => $price_per_unit_converted, // Конвертована ціна за одиницю в поточній валюті (з урахуванням знижок)
+					'total'           => $total_price,
 					'sell_by_pack'    => $sell_by_pack,
 					'pack_size'       => $pack_size,
 					'reward'          => $reward * $cart['quantity'],
