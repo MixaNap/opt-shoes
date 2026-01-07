@@ -180,11 +180,11 @@
               {# Кнопка в кошик та ціна за штуку #}
               <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                 {% if product.qty > 0 %}
-                  <button type="button" class="cart_button" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" style="flex: 1; background: #ffc107; color: #000; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                  <button type="button" class="cart_button btn-default" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" style="flex: 1;">
                     {{ button_cart }}
                   </button>
                 {% else %}
-                  <button type="button" class="cart_button out_of_stock" title="{{text_outstock}}" style="flex: 1; background: #ccc; color: #666; border: none; padding: 10px 15px; border-radius: 4px; cursor: not-allowed;">
+                  <button type="button" class="cart_button btn-default out_of_stock" title="{{text_outstock}}" style="flex: 1; background: #ccc; color: #666; cursor: not-allowed;">
                     {{text_outstock}}
                   </button>
                 {% endif %}

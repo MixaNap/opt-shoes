@@ -138,6 +138,9 @@ $files_to_update = [
     'catalog/view/theme/Crazy/template/checkout/cart.twig',
     'catalog/view/theme/Crazy/template/common/cart.twig',
     
+    // Стилі
+    'catalog/view/theme/Crazy/stylesheet/stylesheet.css',
+    
     // JavaScript
     'catalog/view/javascript/common.js',
     

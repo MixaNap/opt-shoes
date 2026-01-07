@@ -4749,6 +4749,28 @@ h2.price {margin: 0;}
 .product-block button.cart_button:hover{
     color: #1f1f1f;
 }
+/* Стилі для кнопок в категоріях з класом btn-default */
+#content .product-grid .product-block button.cart_button.btn-default,
+.cat_prod .product-block button.cart_button.btn-default {
+    color: #ffffff;
+    background: #ff6f61;
+    border: none;
+    line-height: inherit;
+    border-radius: 0px;
+    padding: 10px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+}
+#content .product-grid .product-block button.cart_button.btn-default::before,
+.cat_prod .product-block button.cart_button.btn-default::before {
+    content: '+ ';
+}
+#content .product-grid .product-block button.cart_button.btn-default:hover,
+.cat_prod .product-block button.cart_button.btn-default:hover {
+    background: #e85a4d;
+    color: #ffffff;
+}
 .product-block .action {
     float: left;
     width: auto;
