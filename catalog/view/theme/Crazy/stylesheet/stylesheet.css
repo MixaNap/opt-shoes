@@ -4768,12 +4768,19 @@ h2.price {margin: 0;}
 .row.cat_prod .product-block button.cart_button.btn-default::before {
     content: '+ ';
 }
+/* Перевизначаємо hover стилі для кнопок btn-default в категоріях - має бути після bootstrap.min.css */
 #content .product-grid .product-block button.cart_button.btn-default:hover,
 .cat_prod .product-block button.cart_button.btn-default:hover,
-.row.cat_prod .product-block button.cart_button.btn-default:hover {
+.row.cat_prod .product-block button.cart_button.btn-default:hover,
+#content .product-grid .product-block button.btn-default.cart_button:hover,
+.cat_prod .product-block button.btn-default.cart_button:hover,
+.row.cat_prod .product-block button.btn-default.cart_button:hover,
+button.cart_button.btn-default:hover {
     background: #e85a4d !important;
+    background-color: #e85a4d !important;
     color: #ffffff !important;
     border: none !important;
+    border-color: transparent !important;
 }
 .product-block .action {
     float: left;
