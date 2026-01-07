@@ -116,12 +116,26 @@
       <span class="stock_status">{{text_outstock}}</span>
     {% endif %}     
        	<div class="countdown">
-											{% if product.specialTime %}
-											 <div class="count-down clock">
-											<div data-countdown="{{ product.specialTime }}" class="countbox hastime"></div>
-											</div>	
-											{% endif %}
+										{% if product.specialTime %}
+										 <div class="count-down clock">
+										<div data-countdown="{{ product.specialTime }}" class="countbox hastime"></div>
 										</div>	
+										{% endif %}
+									</div>
+      
+      {# Іконки зуму та ізбраного поверх фото #}
+      <div class="product_hover_block" style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+        <div class="product_hover_block_inner" style="display: flex; gap: 5px;">
+          <div class="quickview-button">
+            <a class="quickbox" title="{{ button_quickview }}" href="{{ product.quick }}" style="display: block; width: 30px; height: 30px; background: rgba(255,255,255,0.9); border-radius: 50%; text-align: center; line-height: 30px;">
+              <i class="fa fa-search" style="color: #333;"></i>
+            </a>
+          </div>
+          <button class="wishlist" type="button" title="{{ button_wishlist }}" onclick="wishlist.add('{{ product.product_id }}');" style="width: 30px; height: 30px; background: rgba(255,255,255,0.9); border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <i class="fa fa-heart" style="color: #333;"></i>
+          </button>
+        </div>
+      </div>
          
           </div>
             <div class="product-details">
@@ -140,65 +154,49 @@
                     {#&nbsp;<span style="cursor:pointer;" class="total-review{{ product.product_id }}">({{product.review}})</span>#}
                   </div>
               {% endif %}
-               <h4><a href="{{ product.href }}">{{ product.name }}</a></h4>
-               
-               {% if product.sell_by_pack and product.pack_size > 0 %}
-                 <div style="margin: 8px 0; font-size: 0.9em; color: #333;">
-                   <div style="margin-bottom: 4px;">
-                     <strong>упаковка ({{ product.pack_size }} пар):</strong> 
-                     {% if not product.special %}
-                       <strong>{{ product.price }}</strong>
-                     {% else %}
-                       <strong>{{ product.special }}</strong>
-                     {% endif %}
-                   </div>
-                 </div>
-               {% endif %}
-               
-               {% if product.season %}
-                 <div style="margin: 4px 0; font-size: 0.9em; color: #666;">
-                   <strong>сезон:</strong> {{ product.season }}
-                 </div>
-               {% endif %}
-               
-               {% if product.sizes %}
-                 <div style="margin: 4px 0; font-size: 0.9em; color: #666;">
-                   <strong>розміри:</strong> {{ product.sizes }}
-                 </div>
-               {% endif %}
-               
-               {% if product.sku %}
-                 <div style="margin: 4px 0; font-size: 0.9em; color: #666;">
-                   <strong>артикул:</strong> {{ product.sku }}
-                 </div>
-               {% endif %}
-               
-               {% if product.price_per_unit_formatted %}
-                 <div style="margin: 8px 0; font-size: 0.95em; color: #333; font-weight: bold;">
-                   {{ product.price_per_unit_formatted }}
-                 </div>
-               {% endif %}
-               
-               <p class="description">{{ product.description }}</p>
               
-          <div class="product_hover_block">
-                            
-            <div class="product_hover_block_inner">
-              <button class="wishlist" type="button"  title="{{ button_wishlist }} " onclick="wishlist.add('{{ product.product_id }} ');"></button>
-              <button class="compare_button" type="button"  title="{{ button_compare }} " onclick="compare.add('{{ product.product_id }} ');"></button>
-              <div class="quickview-button">
-                <a class="quickbox"  title="{{ button_quickview }}" href="{{ product.quick }}"></a>
-              </div>
-            </div>
-          
-            <div class="action">
-              {% if product.qty > 0 %}
-                <button type="button" class="cart_button" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" >{{ button_cart }}</button>
-                {% else %}
-                <button type="button" class="cart_button out_of_stock" title="{{text_outstock}}" >{{text_outstock}}</button>
+              {# Назва товару #}
+              <h4 style="margin: 10px 0;"><a href="{{ product.href }}">{{ product.name }}</a></h4>
+               
+              {# Інформація про упаковку #}
+              {% if product.sell_by_pack and product.pack_size > 0 %}
+                <div style="margin: 8px 0; font-size: 0.9em; color: #333;">
+                  <strong>упак. ({{ product.pack_size }} шт):</strong> 
+                  {% if not product.special %}
+                    <strong>{{ product.price }}</strong>
+                  {% else %}
+                    <strong>{{ product.special }}</strong>
+                  {% endif %}
+                </div>
               {% endif %}
-            </div>
-          </div>
+               
+              {# Артикул #}
+              {% if product.sku %}
+                <div style="margin: 4px 0; font-size: 0.9em; color: #666;">
+                  <strong>артикул:</strong> {{ product.sku }}
+                </div>
+              {% endif %}
+               
+              {# Кнопка в кошик та ціна за штуку #}
+              <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                {% if product.qty > 0 %}
+                  <button type="button" class="cart_button" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" style="flex: 1; background: #ffc107; color: #000; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    {{ button_cart }}
+                  </button>
+                {% else %}
+                  <button type="button" class="cart_button out_of_stock" title="{{text_outstock}}" style="flex: 1; background: #ccc; color: #666; border: none; padding: 10px 15px; border-radius: 4px; cursor: not-allowed;">
+                    {{text_outstock}}
+                  </button>
+                {% endif %}
+                
+                {% if product.price_per_unit_formatted %}
+                  <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
+                    {{ product.price_per_unit_formatted }}
+                  </div>
+                {% endif %}
+              </div>
+               
+               <p class="description" style="display: none;">{{ product.description }}</p>
            
             </div>
            
