@@ -170,14 +170,30 @@ class ControllerExtensionDQuickcheckoutConfirm extends Controller
             $json = $this->load->controller('extension/d_quickcheckout/payment/prepare', $json);
         }
 
-        $json['order_id'] = $this->session->data['order_id'] = $this->updateOrder();
+        // Обробка помилок при створенні/оновленні замовлення
+        try {
+            $order_id = $this->updateOrder();
+            if ($order_id) {
+                $json['order_id'] = $this->session->data['order_id'] = $order_id;
+            } else {
+                $json['error'] = 'Failed to create/update order';
+            }
+        } catch (Exception $e) {
+            $json['error'] = 'Error creating order: ' . $e->getMessage();
+            if (isset($this->model_extension_module_d_quickcheckout) && method_exists($this->model_extension_module_d_quickcheckout, 'logWrite')) {
+                $this->model_extension_module_d_quickcheckout->logWrite('Controller:: confirm/update - Exception: ' . $e->getMessage());
+            }
+        }
+        
         //statistic
-        $statistic = array(
-            'click' => array(
-                'confirm' => 1
-            )
-        );
-        $this->model_extension_module_d_quickcheckout->updateStatistic($statistic);
+        if (isset($this->model_extension_module_d_quickcheckout) && method_exists($this->model_extension_module_d_quickcheckout, 'updateStatistic')) {
+            $statistic = array(
+                'click' => array(
+                    'confirm' => 1
+                )
+            );
+            $this->model_extension_module_d_quickcheckout->updateStatistic($statistic);
+        }
 
         $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
@@ -441,14 +457,24 @@ class ControllerExtensionDQuickcheckoutConfirm extends Controller
         // Якщо order_id не існує, спочатку створюємо замовлення з базовими даними (сумісність зі старішими версіями PHP)
         if (!isset($this->session->data['order_id']) || $this->session->data['order_id'] == '' || $this->session->data['order_id'] == 0) {
             $order_id = $this->model_extension_d_quickcheckout_order->addOrder($order_data);
-            $this->session->data['order_id'] = $order_id;
-            $this->model_extension_module_d_quickcheckout->logWrite('Controller:: confirm/updateOrder - created new order =' . $order_id);
+            if ($order_id) {
+                $this->session->data['order_id'] = $order_id;
+                if (isset($this->model_extension_module_d_quickcheckout) && method_exists($this->model_extension_module_d_quickcheckout, 'logWrite')) {
+                    $this->model_extension_module_d_quickcheckout->logWrite('Controller:: confirm/updateOrder - created new order =' . $order_id);
+                }
+            } else {
+                return false;
+            }
         } else {
             $order_id = $this->session->data['order_id'];
         }
         
         // Оновлюємо замовлення з повними даними (продукти, totals тощо)
-        $this->model_extension_module_d_quickcheckout->logWrite('Controller:: confirm/updateOrder for order =' . $order_id . ' with $order_data =' . json_encode($order_data));
-        return $this->model_extension_d_quickcheckout_order->updateOrder($order_id, $order_data);
+        if (isset($this->model_extension_module_d_quickcheckout) && method_exists($this->model_extension_module_d_quickcheckout, 'logWrite')) {
+            $this->model_extension_module_d_quickcheckout->logWrite('Controller:: confirm/updateOrder for order =' . $order_id);
+        }
+        
+        $result = $this->model_extension_d_quickcheckout_order->updateOrder($order_id, $order_data);
+        return $result ? $order_id : false;
     }
 }
