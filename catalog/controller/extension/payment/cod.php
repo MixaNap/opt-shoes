@@ -90,14 +90,22 @@ class ControllerExtensionPaymentCod extends Controller {
 				}
 			}
 		} else {
-			$json['error'] = 'Payment method code mismatch. Code: ' . (isset($this->session->data['payment_method']['code']) ? $this->session->data['payment_method']['code'] : 'not set');
+			$payment_code = isset($this->session->data['payment_method']['code']) ? $this->session->data['payment_method']['code'] : 'not set';
+			$json['error'] = 'Payment method code mismatch. Expected: cod, Got: ' . $payment_code;
 			if ($log_file) {
-				@file_put_contents($log_file, "COD Confirm Error: Payment method code mismatch\n", FILE_APPEND);
+				@file_put_contents($log_file, "COD Confirm Error: Payment method code mismatch. Got: " . $payment_code . "\n", FILE_APPEND);
 			}
 		}
 		
 		if ($log_file) {
 			@file_put_contents($log_file, "COD Confirm Response: " . json_encode($json) . "\n", FILE_APPEND);
+		} else {
+			// Якщо логування не працює, додаємо інформацію в JSON для діагностики
+			$json['debug'] = array(
+				'log_file_not_available' => true,
+				'dir_logs_defined' => defined('DIR_LOGS'),
+				'dir_logs_value' => defined('DIR_LOGS') ? DIR_LOGS : 'not defined'
+			);
 		}
 		
 		$this->response->addHeader('Content-Type: application/json');
