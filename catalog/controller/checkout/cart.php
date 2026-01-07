@@ -144,21 +144,12 @@ class ControllerCheckoutCart extends Controller {
 				
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					// ВАЖЛИВО: Використовуємо базову ціну з БД (в USD) для правильного розрахунку податків
-					// Спочатку розраховуємо податки з базової ціни (в USD)
-					$base_currency = 'USD'; // Ціни в БД зберігаються в USD
-					$current_currency = $this->session->data['currency'];
-					
-					// Якщо базова ціна з БД = 0, використовуємо ціну з $product (вже конвертовану)
-					if ($product_base_price > 0) {
-						$price_with_tax_base = $this->tax->calculate($product_base_price, $tax_class_id, $this->config->get('config_tax'));
-						// Потім конвертуємо результат з USD в поточну валюту (UAH)
-						$price_with_tax = $this->currency->convert($price_with_tax_base, $base_currency, $current_currency);
-					} else {
-						// Fallback: використовуємо вже конвертовану ціну з $product
-						// $product['price'] вже конвертована з USD в UAH в cart->getProducts()
-						$price_with_tax = $this->tax->calculate($product['price'], $tax_class_id, $this->config->get('config_tax'));
-					}
+					// ВАЖЛИВО: Використовуємо ціну з $product['price'], яка вже містить:
+					// 1. Базову ціну з БД (в USD)
+					// 2. Знижки (product_discount) або спеціальні ціни (product_special)
+					// 3. Конвертацію в поточну валюту (UAH)
+					// $product['price'] вже конвертована з USD в UAH в cart->getProducts()
+					$price_with_tax = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 					
 					// Отримуємо налаштування валюти для форматування
 					$current_currency_code = $this->session->data['currency'];
