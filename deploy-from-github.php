@@ -138,6 +138,9 @@ $files_to_update = [
     'catalog/view/theme/Crazy/template/checkout/cart.twig',
     'catalog/view/theme/Crazy/template/common/cart.twig',
     
+    // JavaScript
+    'catalog/view/javascript/common.js',
+    
     // Адмін шаблони
     'admin/view/template/common/footer.twig',
     

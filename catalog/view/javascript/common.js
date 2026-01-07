@@ -79,7 +79,8 @@ $(document).ready(function() {
 	$('#list-view').click(function() {
 		$('#content .product-grid > .clearfix').remove();
 
-		$('#content .product-grid').attr('class', 'product-layout product-list col-xs-12');
+		// Змінюємо як product-grid, так і product-list на list view
+		$('#content .product-grid, #content .product-list').attr('class', 'product-layout product-list col-xs-12');
 		$('#grid-view').removeClass('active');
 		$('#list-view').addClass('active');
 
@@ -90,14 +91,18 @@ $(document).ready(function() {
 	$('#grid-view').click(function() {
 		// What a shame bootstrap does not take into account dynamically loaded columns
 		var cols = $('#column-right, #column-left').length;
+		var gridClass = '';
 
 		if (cols == 2) {
-			$('#content .product-list').attr('class', 'product-layout product-grid col-lg-6 col-md-6 col-sm-12 col-xs-12');
+			gridClass = 'product-layout product-grid col-lg-6 col-md-6 col-sm-12 col-xs-12';
 		} else if (cols == 1) {
-			$('#content .product-list').attr('class', 'product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6');
+			gridClass = 'product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6';
 		} else {
-			$('#content .product-list').attr('class', 'product-layout product-grid col-lg-3 col-md-3 col-sm-6 col-xs-12');
+			gridClass = 'product-layout product-grid col-lg-3 col-md-3 col-sm-6 col-xs-12';
 		}
+
+		// Змінюємо як product-list, так і product-grid на grid view
+		$('#content .product-list, #content .product-grid').attr('class', gridClass);
 
 		$('#list-view').removeClass('active');
 		$('#grid-view').addClass('active');
