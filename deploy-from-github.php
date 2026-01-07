@@ -124,6 +124,7 @@ $files_to_update = [
     
     // Адмін-панель (виправлення відображення суми замовлень)
     'admin/controller/sale/order.php',
+    'admin/view/template/sale/order_info.twig',
     
     // Мови
     'catalog/language/uk-ua/common/footer.php',
