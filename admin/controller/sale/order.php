@@ -993,7 +993,7 @@ class ControllerSaleOrder extends Controller {
 			foreach ($totals as $total) {
 				$data['totals'][] = array(
 					'title' => $total['title'],
-					'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value'])
+					'text'  => $this->currency->format($total['value'], $order_info['currency_code'], 1)
 				);
 			}
 
@@ -1667,7 +1667,7 @@ class ControllerSaleOrder extends Controller {
 				foreach ($totals as $total) {
 					$total_data[] = array(
 						'title' => $total['title'],
-						'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value'])
+						'text'  => $this->currency->format($total['value'], $order_info['currency_code'], 1)
 					);
 				}
 
