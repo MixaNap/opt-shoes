@@ -98,7 +98,14 @@ class ControllerCommonCart extends Controller {
 				$price_per_unit_formatted = '';
 				
 				if ($sell_by_pack && $pack_size > 0) {
-					$quantity_packs = floor($product['quantity'] / $pack_size);
+					// Розраховуємо кількість упаковок (як в cart.php)
+					$quantity_packs = (int)floor($product['quantity'] / $pack_size);
+					if ($quantity_packs < 1 && $product['quantity'] > 0) {
+						$quantity_packs = 1;
+					}
+					$quantity_for_total = $quantity_packs;
+					
+					// Ціна за упаковку = ціна за одиницю * розмір упаковки
 					$price_per_pack_numeric = $unit_price * $pack_size;
 					$price_per_pack = $this->currency->format($price_per_pack_numeric, $this->session->data['currency'], 1);
 					$price_per_unit_numeric = $unit_price;
@@ -106,7 +113,7 @@ class ControllerCommonCart extends Controller {
 					// Ціна за упаковку
 					$price = $price_per_pack;
 					// Загальна вартість = кількість упаковок * ціна за упаковку
-					$total = $this->currency->format($price_per_pack_numeric * $quantity_packs, $this->session->data['currency'], 1);
+					$total = $this->currency->format($price_per_pack_numeric * $quantity_for_total, $this->session->data['currency'], 1);
 				} else {
 					$price = $this->currency->format($unit_price, $this->session->data['currency'], 1);
 					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency'], 1);

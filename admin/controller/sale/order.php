@@ -934,6 +934,9 @@ class ControllerSaleOrder extends Controller {
 			$data['products'] = array();
 
 			$products = $this->model_sale_order->getOrderProducts($this->request->get['order_id']);
+			
+			// Завантажуємо модель продукту для отримання інформації про упаковки
+			$this->load->model('catalog/product');
 
 			foreach ($products as $product) {
 				$option_data = array();
@@ -960,6 +963,21 @@ class ControllerSaleOrder extends Controller {
 						}
 					}
 				}
+				
+				// Отримуємо інформацію про товар для перевірки продажу упаковками
+				$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+				$sell_by_pack = isset($product_info['sell_by_pack']) ? (int)$product_info['sell_by_pack'] : 0;
+				$pack_size = isset($product_info['pack_size']) ? (int)$product_info['pack_size'] : 0;
+				$quantity_packs = 0;
+				$quantity_display = $product['quantity'];
+				
+				if ($sell_by_pack && $pack_size > 0) {
+					$quantity_packs = (int)floor($product['quantity'] / $pack_size);
+					if ($quantity_packs < 1 && $product['quantity'] > 0) {
+						$quantity_packs = 1;
+					}
+					$quantity_display = $quantity_packs . ' упаковка' . ($quantity_packs > 1 && $quantity_packs < 5 ? 'и' : ($quantity_packs >= 5 ? 'ок' : '')) . ' (' . $product['quantity'] . ' шт.)';
+				}
 
 				$data['products'][] = array(
 					'order_product_id' => $product['order_product_id'],
@@ -968,8 +986,12 @@ class ControllerSaleOrder extends Controller {
 					'model'    		   => $product['model'],
 					'option'   		   => $option_data,
 					'quantity'		   => $product['quantity'],
-					'price'    		   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
-					'total'    		   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
+					'quantity_display' => $quantity_display,
+					'quantity_packs'   => $quantity_packs,
+					'sell_by_pack'     => $sell_by_pack,
+					'pack_size'        => $pack_size,
+					'price'    		   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], 1),
+					'total'    		   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], 1),
 					'href'     		   => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'], true)
 				);
 			}
@@ -981,7 +1003,7 @@ class ControllerSaleOrder extends Controller {
 			foreach ($vouchers as $voucher) {
 				$data['vouchers'][] = array(
 					'description' => $voucher['description'],
-					'amount'      => $this->currency->format($voucher['amount'], $order_info['currency_code'], $order_info['currency_value']),
+					'amount'      => $this->currency->format($voucher['amount'], $order_info['currency_code'], 1),
 					'href'        => $this->url->link('sale/voucher/edit', 'user_token=' . $this->session->data['user_token'] . '&voucher_id=' . $voucher['voucher_id'], true)
 				);
 			}
@@ -1014,7 +1036,7 @@ class ControllerSaleOrder extends Controller {
 				$data['affiliate'] = '';
 			}
 
-			$data['commission'] = $this->currency->format($order_info['commission'], $order_info['currency_code'], $order_info['currency_value']);
+			$data['commission'] = $this->currency->format($order_info['commission'], $order_info['currency_code'], 1);
 
 			$data['commission_total'] = $this->model_customer_customer->getTotalTransactionsByOrderId($this->request->get['order_id']);
 
@@ -1644,8 +1666,8 @@ class ControllerSaleOrder extends Controller {
 						'model'    => $product['model'],
 						'option'   => $option_data,
 						'quantity' => $product['quantity'],
-						'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
-						'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])
+						'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], 1),
+						'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], 1)
 					);
 				}
 
