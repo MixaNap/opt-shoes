@@ -98,7 +98,7 @@
         <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6">
           <div class="product-block product-thumb">
          <div class="product-block-inner">
-      <div class="image {% if product.qty == 0 %}outstock{% endif %}">
+      <div class="image {% if product.qty == 0 %}outstock{% endif %}" style="position: relative;">
         {% if product.thumb_swap %}
       <a href="{{ product.href }}">
       <img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive reg-image"/>
