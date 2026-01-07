@@ -4768,8 +4768,8 @@ h2.price {margin: 0;}
 }
 #content .product-grid .product-block button.cart_button.btn-default:hover,
 .cat_prod .product-block button.cart_button.btn-default:hover {
-    background: #e85a4d;
-    color: #ffffff;
+    background: #e85a4d !important;
+    color: #ffffff !important;
 }
 .product-block .action {
     float: left;
