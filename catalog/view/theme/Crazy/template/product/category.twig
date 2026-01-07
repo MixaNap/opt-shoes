@@ -204,15 +204,6 @@
       </div>
           </div>
         </div>
-        <script> 
-            $('.total-review{{ product.product_id }}').on('click', function() { 
-             var t='{{product.href}}'; 
-            const parseResult = new DOMParser().parseFromString(t, "text/html");
-            const parsedUrl = parseResult.documentElement.textContent;
-            window.location.href = parsedUrl + '&review';
-            return false;
-          });
-      </script>
   {% endfor %}</div>
       <div class="pagination-wrapper">
         <div class="col-sm-6 text-right page-result">{{ results }}</div>  
