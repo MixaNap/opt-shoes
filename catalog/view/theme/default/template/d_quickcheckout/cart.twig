@@ -81,6 +81,9 @@
 									<button class="btn btn-danger delete hidden-xs" data-product="<%= product.key %>"><i class="fa fa-times"></i></button>
 								</span>
 							</div>
+							<% if(product.pack_info && product.pack_info !== ''){ %>
+								<div style="color: red; font-size: 0.85em; margin-top: 5px;"><%= product.pack_info %></div>
+							<% } %>
 						</td>
 
 						<td class="qc-price hidden-xs <%= parseInt(model.config.columns.price) && model.show_price  ? '' : 'hidden' %>"><%= product.price %></td>

@@ -248,6 +248,24 @@ class ControllerExtensionDQuickcheckoutCart extends Controller {
                 }
             }
 
+            // Розраховуємо інформацію про упаковки для відображення
+            $pack_info = '';
+            if ($sell_by_pack && $pack_size > 0) {
+                $quantity_packs = (int)floor($product['quantity'] / $pack_size);
+                if ($quantity_packs < 1 && $product['quantity'] > 0) {
+                    $quantity_packs = 1;
+                }
+                $pack_info = $quantity_packs . ' упаковки по ' . $pack_size . ' шт.';
+                // Правильна форма слова "упаковка"
+                if ($quantity_packs == 1) {
+                    $pack_info = $quantity_packs . ' упаковка по ' . $pack_size . ' шт.';
+                } elseif ($quantity_packs > 1 && $quantity_packs < 5) {
+                    $pack_info = $quantity_packs . ' упаковки по ' . $pack_size . ' шт.';
+                } else {
+                    $pack_info = $quantity_packs . ' упаковок по ' . $pack_size . ' шт.';
+                }
+            }
+            
             $json['products'][] = array(
                 'key'       => (isset($product['cart_id'])) ? $product['cart_id'] : $product['key'],
                 'image'     => $image,
@@ -257,6 +275,9 @@ class ControllerExtensionDQuickcheckoutCart extends Controller {
                 'option'    => $option_data,
                 'recurring' => $recurring,
                 'quantity'  => $product['quantity'],
+                'sell_by_pack' => $sell_by_pack,
+                'pack_size' => $pack_size,
+                'pack_info' => $pack_info,
                 'stock'     => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
                 'reward'    => ($product['reward'] ? sprintf($this->language->get('text_points'), $product['reward']) : ''),
                 'price'     => $price,

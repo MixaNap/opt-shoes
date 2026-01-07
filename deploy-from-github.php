@@ -121,6 +121,7 @@ $files_to_update = [
     'catalog/controller/extension/payment/cod.php',
     'catalog/model/extension/d_quickcheckout/order.php',
     'catalog/view/theme/default/template/extension/payment/cod.twig',
+    'catalog/view/theme/default/template/d_quickcheckout/cart.twig',
     
     // Адмін-панель (виправлення відображення суми замовлень)
     'admin/controller/sale/order.php',
