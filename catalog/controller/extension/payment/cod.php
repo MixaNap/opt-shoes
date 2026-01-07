@@ -8,6 +8,14 @@ class ControllerExtensionPaymentCod extends Controller {
 		$json = array();
 		
 		if (isset($this->session->data['payment_method']['code']) && $this->session->data['payment_method']['code'] == 'cod') {
+			// Перевірка наявності order_id перед викликом addOrderHistory
+			if (!isset($this->session->data['order_id']) || empty($this->session->data['order_id'])) {
+				$json['error'] = 'Order ID is missing';
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($json));
+				return;
+			}
+			
 			$this->load->model('checkout/order');
 
 			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_cod_order_status_id'));
