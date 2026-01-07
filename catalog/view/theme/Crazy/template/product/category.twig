@@ -190,17 +190,17 @@
                 {% endif %}
                 
                 {# Відображаємо ціну: для товарів з упаковками - ціна за штуку, для звичайних - загальна ціна #}
-                {% if product.price_per_unit_formatted and product.price_per_unit_formatted is not empty %}
+                {% if product.price_per_unit_formatted is defined and product.price_per_unit_formatted is not empty and product.price_per_unit_formatted is not same as(false) %}
                   {# Товар з упаковками - показуємо ціну за штуку #}
                   <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
                     {{ product.price_per_unit_formatted }}
                   </div>
-                {% elseif product.special and product.special is not empty and product.special is not same as(false) %}
+                {% elseif product.special is defined and product.special is not empty and product.special is not same as(false) %}
                   {# Звичайний товар зі знижкою #}
                   <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
                     {{ product.special }}
                   </div>
-                {% elseif product.price and product.price is not empty and product.price is not same as(false) %}
+                {% elseif product.price is defined and product.price is not empty and product.price is not same as(false) %}
                   {# Звичайний товар без знижки #}
                   <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
                     {{ product.price }}
