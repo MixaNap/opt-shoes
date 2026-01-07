@@ -1678,7 +1678,7 @@ class ControllerSaleOrder extends Controller {
 				foreach ($vouchers as $voucher) {
 					$voucher_data[] = array(
 						'description' => $voucher['description'],
-						'amount'      => $this->currency->format($voucher['amount'], $order_info['currency_code'], $order_info['currency_value'])
+						'amount'      => $this->currency->format($voucher['amount'], $order_info['currency_code'], 1)
 					);
 				}
 
