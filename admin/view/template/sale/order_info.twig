@@ -164,7 +164,13 @@
                       <small> - {{ option.name }}: <a href="{{ option.href }}">{{ option.value }}</a></small> {% endif %}
                   {% endfor %}</td>
                 <td class="text-left">{{ product.model }}</td>
-                <td class="text-right">{{ product.quantity }}</td>
+                <td class="text-right">
+                  {% if product.sell_by_pack and product.pack_size > 0 %}
+                    {{ product.quantity_display }}
+                  {% else %}
+                    {{ product.quantity }}
+                  {% endif %}
+                </td>
                 <td class="text-right">{{ product.price }}</td>
                 <td class="text-right">{{ product.total }}</td>
               </tr>
