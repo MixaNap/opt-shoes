@@ -30,11 +30,25 @@ class ControllerExtensionPaymentCod extends Controller {
 			
 			$this->load->model('checkout/order');
 			
+			// Діагностика моделі
+			$json['debug']['model_loaded'] = isset($this->model_checkout_order);
+			$json['debug']['model_class'] = isset($this->model_checkout_order) ? get_class($this->model_checkout_order) : 'not loaded';
+			$json['debug']['method_exists'] = isset($this->model_checkout_order) ? method_exists($this->model_checkout_order, 'addOrderHistory') : false;
+			$json['debug']['methods_available'] = isset($this->model_checkout_order) ? get_class_methods($this->model_checkout_order) : array();
+			
 			// Перевірка чи order_id існує в базі даних
 			$order_id = (int)$this->session->data['order_id'];
 			$json['debug']['order_id'] = $order_id;
 			
 			// Перевірка чи замовлення існує перед викликом addOrderHistory
+			if (!isset($this->model_checkout_order)) {
+				$json['error'] = 'Model checkout/order not loaded';
+				$json['debug']['step'] = 'model_not_loaded';
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($json));
+				return;
+			}
+			
 			$order_info = $this->model_checkout_order->getOrder($order_id);
 			if (!$order_info) {
 				$json['error'] = 'Order not found: ' . $order_id;
@@ -53,16 +67,17 @@ class ControllerExtensionPaymentCod extends Controller {
 			$json['debug']['order_status_id'] = $order_status_id;
 			$json['debug']['step'] = 'calling_addOrderHistory';
 
-			// Виклик addOrderHistory з обробкою помилок
-			if (method_exists($this->model_checkout_order, 'addOrderHistory')) {
+			// Виклик addOrderHistory (як в інших методах оплати)
+			try {
 				$this->model_checkout_order->addOrderHistory($order_id, $order_status_id);
 				$redirect_url = $this->url->link('checkout/success');
 				$json['redirect'] = $redirect_url;
 				$json['debug']['step'] = 'success';
 				$json['debug']['redirect_url'] = $redirect_url;
-			} else {
-				$json['error'] = 'addOrderHistory method not found';
-				$json['debug']['step'] = 'method_not_found';
+			} catch (Exception $e) {
+				$json['error'] = 'Error calling addOrderHistory: ' . $e->getMessage();
+				$json['debug']['step'] = 'exception';
+				$json['debug']['exception'] = $e->getMessage();
 			}
 		} else {
 			$payment_code = isset($this->session->data['payment_method']['code']) ? $this->session->data['payment_method']['code'] : 'not set';
