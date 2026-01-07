@@ -165,7 +165,8 @@ class ControllerCheckoutCart extends Controller {
 					};
 					
 					if ($sell_by_pack && $pack_size > 0) {
-						// $product['price'] містить ціну за одиницю (з урахуванням знижок)
+						// ВАЖЛИВО: $product['price'] містить ціну за одиницю (з урахуванням знижок)
+						// Це вже розраховано в cart.php як: ціна за упаковку з БД / pack_size
 						// $price_with_tax = ціна за одиницю з податками
 						// Ціна за упаковку = ціна за одиницю * розмір упаковки
 						$price_per_pack_with_tax = $price_with_tax * $pack_size;

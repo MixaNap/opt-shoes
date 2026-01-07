@@ -264,26 +264,24 @@ class Cart {
 				// Але якщо товар продається упаковками, то потрібно використовувати кількість упаковок
 				$quantity_for_total = $cart['quantity'];
 				
-				// Зберігаємо ціну за одиницю (з урахуванням знижок) для подальшого використання
-				$price_per_unit_converted = $price_converted;
-				
 				if ($sell_by_pack && $pack_size > 0) {
-					// Товар продається упаковками: $price = ціна за одиницю (з урахуванням знижок)
-					// Для totals потрібно: ціна за упаковку * кількість упаковок
-					// Ціна за упаковку = ціна за одиницю * розмір упаковки
+					// ВАЖЛИВО: Для товарів що продаються упаковками, $price в БД - це ціна за УПАКОВКУ (не за одиницю!)
+					// $price_converted - це ціна за упаковку (з урахуванням знижок)
+					// Розраховуємо кількість упаковок
 					$quantity_packs = (int)floor($cart['quantity'] / $pack_size);
 					if ($quantity_packs < 1 && $cart['quantity'] > 0) {
 						$quantity_packs = 1;
 					}
-					// $price_converted - це ціна за одиницю зі знижкою, розраховуємо ціну за упаковку
-					$price_per_pack = $price_converted * $pack_size;
 					$quantity_for_total = $quantity_packs;
 					// Для totals використовуємо ціну за упаковку * кількість упаковок
-					$total_price = $price_per_pack * $quantity_for_total;
+					$total_price = $price_converted * $quantity_for_total;
+					// Для відображення потрібна ціна за одиницю = ціна за упаковку / розмір упаковки
+					$price_per_unit_converted = $price_converted / $pack_size;
 				} else {
 					// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки), price_converted = ціна за одиницю
 					$quantity_for_total = $cart['quantity'];
 					$total_price = $price_converted * $quantity_for_total;
+					$price_per_unit_converted = $price_converted;
 				}
 				
 				$product_data[] = array(
