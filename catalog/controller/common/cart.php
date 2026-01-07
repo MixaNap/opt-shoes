@@ -47,7 +47,7 @@ class ControllerCommonCart extends Controller {
 			array_multisort($sort_order, SORT_ASC, $totals);
 		}
 
-		$data['text_items'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
+		$data['text_items'] = sprintf($this->language->get('text_items'), $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency'], 1));
 
 		$this->load->model('tool/image');
 		$this->load->model('tool/upload');
@@ -100,16 +100,16 @@ class ControllerCommonCart extends Controller {
 				if ($sell_by_pack && $pack_size > 0) {
 					$quantity_packs = floor($product['quantity'] / $pack_size);
 					$price_per_pack_numeric = $unit_price * $pack_size;
-					$price_per_pack = $this->currency->format($price_per_pack_numeric, $this->session->data['currency']);
+					$price_per_pack = $this->currency->format($price_per_pack_numeric, $this->session->data['currency'], 1);
 					$price_per_unit_numeric = $unit_price;
-					$price_per_unit_formatted = $this->currency->format($price_per_unit_numeric, $this->session->data['currency']);
+					$price_per_unit_formatted = $this->currency->format($price_per_unit_numeric, $this->session->data['currency'], 1);
 					// Ціна за упаковку
 					$price = $price_per_pack;
 					// Загальна вартість = кількість упаковок * ціна за упаковку
-					$total = $this->currency->format($price_per_pack_numeric * $quantity_packs, $this->session->data['currency']);
+					$total = $this->currency->format($price_per_pack_numeric * $quantity_packs, $this->session->data['currency'], 1);
 				} else {
-					$price = $this->currency->format($unit_price, $this->session->data['currency']);
-					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+					$price = $this->currency->format($unit_price, $this->session->data['currency'], 1);
+					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency'], 1);
 				}
 			} else {
 				$price = false;
@@ -156,7 +156,7 @@ class ControllerCommonCart extends Controller {
 		foreach ($totals as $total) {
 			$data['totals'][] = array(
 				'title' => $total['title'],
-				'text'  => $this->currency->format($total['value'], $this->session->data['currency']),
+				'text'  => $this->currency->format($total['value'], $this->session->data['currency'], 1),
 			);
 		}
 
