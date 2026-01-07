@@ -20,6 +20,16 @@ class ControllerExtensionPaymentCod extends Controller {
 			
 			// Перевірка чи order_id існує в базі даних
 			$order_id = (int)$this->session->data['order_id'];
+			
+			// Перевірка чи замовлення існує перед викликом addOrderHistory
+			$order_info = $this->model_checkout_order->getOrder($order_id);
+			if (!$order_info) {
+				$json['error'] = 'Order not found';
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($json));
+				return;
+			}
+			
 			$order_status_id = $this->config->get('payment_cod_order_status_id');
 			
 			if (!$order_status_id || $order_status_id == '') {
