@@ -177,7 +177,7 @@
                 </div>
               {% endif %}
                
-              {# Кнопка в кошик та ціна за штуку #}
+              {# Кнопка в кошик та ціна #}
               <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                 {% if product.qty > 0 %}
                   <button type="button" class="cart_button btn-default" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" style="flex: 1;">
@@ -189,9 +189,21 @@
                   </button>
                 {% endif %}
                 
+                {# Відображаємо ціну: для товарів з упаковками - ціна за штуку, для звичайних - загальна ціна #}
                 {% if product.price_per_unit_formatted %}
+                  {# Товар з упаковками - показуємо ціну за штуку #}
                   <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
                     {{ product.price_per_unit_formatted }}
+                  </div>
+                {% elseif product.special %}
+                  {# Звичайний товар зі знижкою #}
+                  <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
+                    {{ product.special }}
+                  </div>
+                {% elseif product.price %}
+                  {# Звичайний товар без знижки #}
+                  <div style="font-size: 1.1em; color: #333; font-weight: bold; white-space: nowrap;">
+                    {{ product.price }}
                   </div>
                 {% endif %}
               </div>
