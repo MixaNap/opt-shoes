@@ -9,7 +9,7 @@ class ControllerExtensionPaymentCod extends Controller {
 		
 		if (isset($this->session->data['payment_method']['code']) && $this->session->data['payment_method']['code'] == 'cod') {
 			// Перевірка наявності order_id перед викликом addOrderHistory
-			if (!isset($this->session->data['order_id']) || empty($this->session->data['order_id'])) {
+			if (!isset($this->session->data['order_id']) || $this->session->data['order_id'] == '' || $this->session->data['order_id'] == 0) {
 				$json['error'] = 'Order ID is missing';
 				$this->response->addHeader('Content-Type: application/json');
 				$this->response->setOutput(json_encode($json));
@@ -17,8 +17,16 @@ class ControllerExtensionPaymentCod extends Controller {
 			}
 			
 			$this->load->model('checkout/order');
+			
+			// Перевірка чи order_id існує в базі даних
+			$order_id = (int)$this->session->data['order_id'];
+			$order_status_id = $this->config->get('payment_cod_order_status_id');
+			
+			if (!$order_status_id || $order_status_id == '') {
+				$order_status_id = 1; // Статус за замовчуванням
+			}
 
-			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_cod_order_status_id'));
+			$this->model_checkout_order->addOrderHistory($order_id, $order_status_id);
 		
 			$json['redirect'] = $this->url->link('checkout/success');
 		}

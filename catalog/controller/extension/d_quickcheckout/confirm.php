@@ -438,8 +438,8 @@ class ControllerExtensionDQuickcheckoutConfirm extends Controller
         }
         $this->load->model('extension/d_quickcheckout/order');
         
-        // Якщо order_id не існує, спочатку створюємо замовлення з базовими даними
-        if (!isset($this->session->data['order_id']) || empty($this->session->data['order_id'])) {
+        // Якщо order_id не існує, спочатку створюємо замовлення з базовими даними (сумісність зі старішими версіями PHP)
+        if (!isset($this->session->data['order_id']) || $this->session->data['order_id'] == '' || $this->session->data['order_id'] == 0) {
             $order_id = $this->model_extension_d_quickcheckout_order->addOrder($order_data);
             $this->session->data['order_id'] = $order_id;
             $this->model_extension_module_d_quickcheckout->logWrite('Controller:: confirm/updateOrder - created new order =' . $order_id);

@@ -240,9 +240,14 @@ class ModelExtensionDQuickcheckoutOrder extends Model {
         // Totals
         $this->db->query("DELETE FROM " . DB_PREFIX . "order_total WHERE order_id = '" . (int) $order_id . "'");
         foreach ($data['totals'] as $total) {
-            // Перевірка на null для sort_order
-            $sort_order = isset($total['sort_order']) && $total['sort_order'] !== null ? (int) $total['sort_order'] : 0;
-            $this->db->query("INSERT INTO " . DB_PREFIX . "order_total SET order_id = '" . (int) $order_id . "', code = '" . $this->db->escape($total['code']) . "', title = '" . $this->db->escape($total['title']) . "', `value` = '" . (float) $total['value'] . "', sort_order = '" . $sort_order . "'");
+            // Перевірка на null для sort_order (сумісність зі старішими версіями PHP)
+            $sort_order = 0;
+            if (isset($total['sort_order'])) {
+                if ($total['sort_order'] !== null && $total['sort_order'] !== '') {
+                    $sort_order = (int)$total['sort_order'];
+                }
+            }
+            $this->db->query("INSERT INTO " . DB_PREFIX . "order_total SET order_id = '" . (int) $order_id . "', code = '" . $this->db->escape($total['code']) . "', title = '" . $this->db->escape($total['title']) . "', `value` = '" . (float) $total['value'] . "', sort_order = '" . (int)$sort_order . "'");
         }
         if(VERSION < '2.3.0.0'){
             $this->event->trigger('post.order.add', $order_id);
@@ -320,8 +325,13 @@ class ModelExtensionDQuickcheckoutOrder extends Model {
         $sort_order = array();
 
         foreach ($total_data['totals'] as $key => $value) {
-            // Встановлюємо значення за замовчуванням для sort_order якщо воно null
-            $sort_order[$key] = isset($value['sort_order']) && $value['sort_order'] !== null ? (int)$value['sort_order'] : 999;
+            // Встановлюємо значення за замовчуванням для sort_order якщо воно null (сумісність зі старішими версіями PHP)
+            $sort_order[$key] = 999;
+            if (isset($value['sort_order'])) {
+                if ($value['sort_order'] !== null && $value['sort_order'] !== '') {
+                    $sort_order[$key] = (int)$value['sort_order'];
+                }
+            }
             // Також оновлюємо значення в масиві totals
             $total_data['totals'][$key]['sort_order'] = $sort_order[$key];
         }

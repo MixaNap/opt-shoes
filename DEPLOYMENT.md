@@ -162,3 +162,5 @@ chmod -R 755 system/storage/
 3. Перевірте конфігурацію БД в `config.php`
 
 
+
+
