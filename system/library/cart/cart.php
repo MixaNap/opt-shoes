@@ -248,7 +248,7 @@ class Cart {
 				$pack_size = isset($product_query->row['pack_size']) ? (int)$product_query->row['pack_size'] : 0;
 				
 				// Конвертуємо ціну з базової валюти в поточну валюту (долар -> грн)
-				// ВАЖЛИВО: $price вже містить базову ціну (в доларах) з БД
+				// ВАЖЛИВО: $price вже містить базову ціну (в доларах) з БД (з урахуванням знижок/special)
 				// ВАЖЛИВО: $option_price також в доларах з БД
 				// Потрібно конвертувати її в поточну валюту перед розрахунком totals
 				$base_currency = 'USD'; // Ціни в БД зберігаються в USD
@@ -261,20 +261,24 @@ class Cart {
 				// Опції не додаються до ціни для розрахунку totals
 				
 				// Для розрахунку totals використовуємо кількість штук (як завжди)
-				// Але якщо товар продається упаковками, то price вже є ціною за упаковку,
-				// тому потрібно використовувати кількість упаковок для totals
+				// Але якщо товар продається упаковками, то потрібно використовувати кількість упаковок
 				$quantity_for_total = $cart['quantity'];
 				
 				if ($sell_by_pack && $pack_size > 0) {
-					// Товар продається упаковками: price = ціна за упаковку, quantity = штуки
-					// Для totals потрібно використовувати кількість упаковок
+					// Товар продається упаковками: $price = ціна за одиницю (з урахуванням знижок)
+					// Для totals потрібно: ціна за упаковку * кількість упаковок
+					// Ціна за упаковку = ціна за одиницю * розмір упаковки
 					$quantity_packs = (int)floor($cart['quantity'] / $pack_size);
 					if ($quantity_packs < 1 && $cart['quantity'] > 0) {
 						$quantity_packs = 1;
 					}
+					// $price_converted - це ціна за одиницю зі знижкою, потрібно помножити на розмір упаковки
+					$price_per_pack = $price_converted * $pack_size;
 					$quantity_for_total = $quantity_packs;
+					// Для totals використовуємо ціну за упаковку * кількість упаковок
+					$price_converted = $price_per_pack;
 				}
-				// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки)
+				// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки), price_converted = ціна за одиницю
 				
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
