@@ -93,6 +93,7 @@ $files_to_update = [
     'catalog/controller/extension/payment/cod.php',
     'catalog/model/extension/d_quickcheckout/order.php',
     'catalog/view/theme/default/template/extension/payment/cod.twig',
+    'catalog/controller/common/cart.php', // Міні-кошик (виправлення розрахунку цін)
 ];
 
 $github_base = 'https://raw.githubusercontent.com/MixaNap/opt-shoes/main/';
