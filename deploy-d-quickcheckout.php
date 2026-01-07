@@ -94,6 +94,8 @@ $files_to_update = [
     'catalog/model/extension/d_quickcheckout/order.php',
     'catalog/view/theme/default/template/extension/payment/cod.twig',
     'catalog/controller/common/cart.php', // Міні-кошик (виправлення розрахунку цін)
+    'admin/controller/sale/order.php', // Адмін-панель (виправлення відображення суми замовлень)
+    'admin/view/template/sale/order_info.twig', // Адмін-панель (відображення інформації про упаковки)
 ];
 
 $github_base = 'https://raw.githubusercontent.com/MixaNap/opt-shoes/main/';
