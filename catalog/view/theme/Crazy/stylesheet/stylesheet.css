@@ -4751,25 +4751,29 @@ h2.price {margin: 0;}
 }
 /* Стилі для кнопок в категоріях з класом btn-default */
 #content .product-grid .product-block button.cart_button.btn-default,
-.cat_prod .product-block button.cart_button.btn-default {
-    color: #ffffff;
-    background: #ff6f61;
-    border: none;
+.cat_prod .product-block button.cart_button.btn-default,
+.row.cat_prod .product-block button.cart_button.btn-default {
+    color: #ffffff !important;
+    background: #ff6f61 !important;
+    border: none !important;
     line-height: inherit;
-    border-radius: 0px;
+    border-radius: 0px !important;
     padding: 10px 15px;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
 }
 #content .product-grid .product-block button.cart_button.btn-default::before,
-.cat_prod .product-block button.cart_button.btn-default::before {
+.cat_prod .product-block button.cart_button.btn-default::before,
+.row.cat_prod .product-block button.cart_button.btn-default::before {
     content: '+ ';
 }
 #content .product-grid .product-block button.cart_button.btn-default:hover,
-.cat_prod .product-block button.cart_button.btn-default:hover {
+.cat_prod .product-block button.cart_button.btn-default:hover,
+.row.cat_prod .product-block button.cart_button.btn-default:hover {
     background: #e85a4d !important;
     color: #ffffff !important;
+    border: none !important;
 }
 .product-block .action {
     float: left;
