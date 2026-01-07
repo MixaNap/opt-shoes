@@ -28,25 +28,26 @@ class ControllerExtensionPaymentCod extends Controller {
 				return;
 			}
 			
+			// Завантаження моделі (як в інших методах оплати)
 			$this->load->model('checkout/order');
-			
-			// Діагностика моделі
-			$json['debug']['model_loaded'] = isset($this->model_checkout_order);
-			$json['debug']['model_class'] = isset($this->model_checkout_order) ? get_class($this->model_checkout_order) : 'not loaded';
-			$json['debug']['method_exists'] = isset($this->model_checkout_order) ? method_exists($this->model_checkout_order, 'addOrderHistory') : false;
-			$json['debug']['methods_available'] = isset($this->model_checkout_order) ? get_class_methods($this->model_checkout_order) : array();
 			
 			// Перевірка чи order_id існує в базі даних
 			$order_id = (int)$this->session->data['order_id'];
 			$json['debug']['order_id'] = $order_id;
 			
-			// Перевірка чи замовлення існує перед викликом addOrderHistory
-			if (!isset($this->model_checkout_order)) {
-				$json['error'] = 'Model checkout/order not loaded';
-				$json['debug']['step'] = 'model_not_loaded';
-				$this->response->addHeader('Content-Type: application/json');
-				$this->response->setOutput(json_encode($json));
-				return;
+			// Якщо модель не завантажилася стандартним способом, спробуємо завантажити напряму
+			if (!isset($this->model_checkout_order) || !is_object($this->model_checkout_order)) {
+				$model_file = DIR_APPLICATION . 'model/checkout/order.php';
+				if (file_exists($model_file)) {
+					require_once($model_file);
+					$this->model_checkout_order = new ModelCheckoutOrder($this->registry);
+				} else {
+					$json['error'] = 'Model checkout/order file not found at: ' . $model_file;
+					$json['debug']['step'] = 'model_file_not_found';
+					$this->response->addHeader('Content-Type: application/json');
+					$this->response->setOutput(json_encode($json));
+					return;
+				}
 			}
 			
 			$order_info = $this->model_checkout_order->getOrder($order_id);
