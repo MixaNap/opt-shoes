@@ -2063,6 +2063,7 @@ header .header-cart a .fa{
 .header-logo img {
 	display: inline-block;
 	max-width: 100%;
+	margin-top: -20px;
 }
 .content_header_top .box.webdigifycategory{
     left:0;
