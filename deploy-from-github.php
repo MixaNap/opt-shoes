@@ -101,54 +101,18 @@ echo "========================================\n\n";
 
 // Список файлів для оновлення
 $files_to_update = [
-    // Адмін панель
-    'admin/model/catalog/product.php',
-    'admin/controller/catalog/product.php',
-    'admin/view/template/catalog/product_form.twig',
-    'admin/language/uk-ua/common/footer.php',
-    
-    // Каталог
-    'catalog/model/catalog/product.php',
-    'catalog/controller/product/product.php',
-    'catalog/controller/product/category.php',
-    'catalog/controller/checkout/cart.php',
-    'catalog/controller/common/cart.php',
-    'catalog/model/extension/total/sub_total.php',
-    
-    // d_quickcheckout модуль (виправлення розрахунку цін)
-    'catalog/controller/extension/d_quickcheckout/cart.php',
-    'catalog/controller/extension/d_quickcheckout/confirm.php',
-    'catalog/controller/extension/payment/cod.php',
-    'catalog/model/extension/d_quickcheckout/order.php',
-    'catalog/view/theme/default/template/extension/payment/cod.twig',
-    'catalog/view/theme/default/template/d_quickcheckout/cart.twig',
-    
-    // Адмін-панель (виправлення відображення суми замовлень)
-    'admin/controller/sale/order.php',
-    'admin/view/template/sale/order_info.twig',
-    
-    // Мови
-    'catalog/language/uk-ua/common/footer.php',
-    'catalog/language/uk-ua/extension/module/webdigifytabs.php',
-    'catalog/language/ru-ru/extension/module/webdigifytabs.php',
-    
-    // Шаблони
-    'catalog/view/theme/Crazy/template/product/product.twig',
-    'catalog/view/theme/Crazy/template/product/category.twig',
-    'catalog/view/theme/Crazy/template/checkout/cart.twig',
-    'catalog/view/theme/Crazy/template/common/cart.twig',
-    
-    // Стилі
-    'catalog/view/theme/Crazy/stylesheet/stylesheet.css',
-    
-    // JavaScript
-    'catalog/view/javascript/common.js',
-    
-    // Адмін шаблони
-    'admin/view/template/common/footer.twig',
-    
-    // Система
-    'system/library/cart/cart.php',
+    // HomePage Product Tabs 2 (новий модуль)
+    'admin/controller/extension/module/webdigifytabs2.php',
+    'admin/view/template/extension/module/webdigifytabs2.twig',
+    'admin/language/en-gb/extension/module/webdigifytabs2.php',
+    'admin/language/uk-ua/extension/module/webdigifytabs2.php',
+    'admin/language/ru-ru/extension/module/webdigifytabs2.php',
+    'catalog/controller/extension/module/webdigifytabs2.php',
+    'catalog/view/theme/Crazy/template/extension/module/webdigifytabs2.twig',
+    'catalog/language/en-gb/extension/module/webdigifytabs2.php',
+    'catalog/language/uk-ua/extension/module/webdigifytabs2.php',
+    'catalog/language/ru-ru/extension/module/webdigifytabs2.php',
+    'catalog/view/javascript/webdigify/custom.js',
 ];
 
 $github_base = 'https://raw.githubusercontent.com/MixaNap/opt-shoes/main/';
@@ -253,6 +217,7 @@ $possibleCachePaths = [
 $possibleModificationPaths = [
     $baseDir . '/system/storage/modification/',
     $baseDir . '/storage/modification/',
+    'D:/OSPanel/domains/storage/modification/',
 ];
 
 $cacheCleared = false;
