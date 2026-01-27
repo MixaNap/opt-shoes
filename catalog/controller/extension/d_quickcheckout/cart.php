@@ -265,7 +265,7 @@ class ControllerExtensionDQuickcheckoutCart extends Controller {
                     $pack_info = $quantity_packs . ' упаковок по ' . $pack_size . ' шт.';
                 }
             }
-            
+
             $json['products'][] = array(
                 'key'       => (isset($product['cart_id'])) ? $product['cart_id'] : $product['key'],
                 'image'     => $image,

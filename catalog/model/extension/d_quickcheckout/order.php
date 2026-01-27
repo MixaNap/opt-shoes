@@ -41,6 +41,17 @@ class ModelExtensionDQuickcheckoutOrder extends Model {
             $result = false;
         }
 
+        if (empty($this->session->data['payment_methods'])) {
+            $this->session->data['payment_methods'] = array(
+                'dummy' => array(
+                    'code'       => 'dummy',
+                    'title'      => 'Оплата при отриманні',
+                    'sort_order' => 0
+                )
+            );
+            $this->session->data['payment_method'] = $this->session->data['payment_methods']['dummy'];
+        }
+
         if ($this->cart->getTotal() < $this->session->data['d_quickcheckout']['general']['min_order']['value']) {
             $result = false;
         }

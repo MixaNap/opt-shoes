@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>SP Telegram Notification FREE</name>
+    <code>sp_tg_free</code>
+    <version>1</version>
+    <author>spectre</author>
+    <link>https://freelancer.od.ua/</link>
+	  <file path="catalog/model/checkout/order.php">
+	<operation error="skip">
+      <search><![CDATA[$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "']]></search>
+      <add position="after">
+	  <![CDATA[
+		$this->load->model('tool/sp_tg');
+		if ($this->config->get('sp_tg_status')) {
+			$this->model_tool_sp_tg->sendTgMessage($order_id, $order_status_id, $order_info);
+		}	
+		]]>
+      </add>
+    </operation>
+  </file>
+</modification>

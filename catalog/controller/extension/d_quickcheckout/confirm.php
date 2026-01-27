@@ -175,6 +175,16 @@ class ControllerExtensionDQuickcheckoutConfirm extends Controller
             $order_id = $this->updateOrder();
             if ($order_id) {
                 $json['order_id'] = $this->session->data['order_id'] = $order_id;
+
+                if (isset($this->session->data['payment_method']['code']) && $this->session->data['payment_method']['code'] === 'dummy') {
+                    $this->load->model('checkout/order');
+                    $order_status_id = $this->config->get('payment_cod_order_status_id');
+                    if (!$order_status_id || $order_status_id == '') {
+                        $order_status_id = 1;
+                    }
+                    $this->model_checkout_order->addOrderHistory($order_id, $order_status_id);
+                    $json['redirect'] = $this->url->link('checkout/success');
+                }
             } else {
                 $json['error'] = 'Failed to create/update order';
             }

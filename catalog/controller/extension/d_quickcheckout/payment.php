@@ -38,6 +38,13 @@ class ControllerExtensionDQuickcheckoutPayment extends Controller {
 	public function prepare($json){
 		$this->load->model('extension/d_quickcheckout/method');
 		if(isset($this->session->data['payment_method']) && isset($this->session->data['payment_method']['code'])){
+			if ($this->session->data['payment_method']['code'] === 'dummy') {
+				$json['payment'] = '';
+				$json['payment_popup'] = false;
+				$json['payment_popup_title'] = $this->session->data['payment_method']['title'];
+				return $json;
+			}
+
 			$json['payment_popup'] = $this->model_extension_d_quickcheckout_method->getPaymentPopup($this->session->data['payment_method']['code']);
 			
 			if($json['payment_popup']){

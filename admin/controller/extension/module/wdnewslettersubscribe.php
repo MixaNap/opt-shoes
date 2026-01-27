@@ -293,7 +293,6 @@ class ControllerExtensionModuleWDNewslettersubscribe extends Controller {
 		$pagination->total = $user_total;
 		$pagination->page = $page;
 		$pagination->limit = 100;
-		$pagination->text = $this->language->get('text_pagination');
 		$pagination->url = $this->url->link('extension/module/wdnewslettersubscribe', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 			
 		$data['pagination'] = $pagination->render();

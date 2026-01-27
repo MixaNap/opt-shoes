@@ -148,7 +148,7 @@ class ControllerCheckoutCart extends Controller {
 					// 1. Базову ціну з БД (в USD)
 					// 2. Знижки (product_discount) або спеціальні ціни (product_special)
 					// 3. Конвертацію в поточну валюту (UAH)
-					// $product['price'] вже конвертована з USD в UAH в cart->getProducts()
+						// $product['price'] вже конвертована з USD в UAH в cart->getProducts()
 					$price_with_tax = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 					
 					// Отримуємо налаштування валюти для форматування

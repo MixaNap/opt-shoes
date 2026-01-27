@@ -69,9 +69,46 @@
             $this->load->model('extension/module/d_quickcheckout');
             $this->load->model('extension/d_quickcheckout/method');
             $this->load->model('extension/d_quickcheckout/address');
-             $this->load->model('extension/d_quickcheckout/order');
+            $this->load->model('extension/d_quickcheckout/order');
+
+            if (!isset($this->session->data['payment_address']) || !is_array($this->session->data['payment_address'])) {
+                $this->session->data['payment_address'] = array();
+            }
+
+            if (empty($this->session->data['payment_address']['country_id']) || empty($this->session->data['payment_address']['zone_id'])) {
+                $this->session->data['payment_address']['country_id'] = $this->config->get('config_country_id');
+                $this->session->data['payment_address']['zone_id'] = $this->config->get('config_zone_id');
+                if (!isset($this->session->data['payment_address']['shipping_address'])) {
+                    $this->session->data['payment_address']['shipping_address'] = 0;
+                }
+                $this->session->data['payment_address'] = $this->model_extension_d_quickcheckout_address->prepareAddress($this->session->data['payment_address']);
+            }
+
+            if (!isset($this->session->data['total']) || !is_numeric($this->session->data['total'])) {
+                $totals = array();
+                $taxes = $this->cart->getTaxes();
+                $total = 0;
+                $total_data = array(
+                    'totals' => &$totals,
+                    'taxes'  => &$taxes,
+                    'total'  => &$total
+                );
+                $this->model_extension_d_quickcheckout_order->getTotals($total_data);
+                $this->session->data['total'] = $total;
+            }
 
             $this->session->data['payment_methods'] = $this->model_extension_d_quickcheckout_method->getPaymentMethods($this->session->data['payment_address'], $this->session->data['total']);
+
+            if (empty($this->session->data['payment_methods'])) {
+                $this->session->data['payment_methods'] = array(
+                    'dummy' => array(
+                        'code'       => 'dummy',
+                        'title'      => 'Оплата при отриманні',
+                        'sort_order' => 0
+                    )
+                );
+                $this->session->data['payment_method'] = $this->session->data['payment_methods']['dummy'];
+            }
 
             if (isset($this->request->post['payment_method'])) {
                 $this->session->data['payment_method'] = $this->session->data['payment_methods'][$this->request->post['payment_method']];
@@ -89,12 +126,7 @@
 
             $json['payment_methods'] = $this->session->data['payment_methods'];
 
-            if (empty($this->session->data['payment_methods'])) {
-                $this->load->language('checkout/checkout');
-                $json['payment_error'] = sprintf($this->language->get('error_no_payment'), $this->url->link('information/contact'));
-            } else {
-                $json['payment_error'] = '';
-            }
+            $json['payment_error'] = '';
             $json['payment_method'] = $this->session->data['payment_method'];
             $json['show_confirm'] = $this->model_extension_d_quickcheckout_order->showConfirm();
 
