@@ -1942,6 +1942,8 @@ div#wdcmssubbanner .wdsubbanner {
 .tabfeatured_default_width{ width:240px;}
 .tabbestseller_default_width{ width:340px;}
 .tablatest_default_width{ width:340px;}
+.tabbestseller2_default_width{ width:280px;}
+.tablatest2_default_width{ width:280px;}
 .tabspecial_default_width{ width:340px;}
 .featured_default_width{ width:340px;}
 .tab-content .tab {
@@ -9841,6 +9843,25 @@ button.btn.btn-primary.parallex-btn:hover:before  {
 	.related_default_width,.wdproductcategory,.related_default_width {
 	    width:50%;
 	}
+	.tabbestseller_default_width,
+	.tablatest_default_width {
+		width: 160px;
+	}
+	#tabbestseller-grid > li.double-slideitem,
+	#tablatest-grid > li.double-slideitem {
+		width: 100% !important;
+		float: left;
+	}
+	#tabbestseller-grid > li.double-slideitem > ul,
+	#tablatest-grid > li.double-slideitem > ul {
+		width: 100%;
+		overflow: hidden;
+	}
+	#tabbestseller-grid .product-items,
+	#tablatest-grid .product-items {
+		width: 50% !important;
+		float: left;
+	}
 	.additional_default_width{
 		width:150px;
 	}
@@ -9856,6 +9877,10 @@ button.btn.btn-primary.parallex-btn:hover:before  {
 	.tablatest_default_width, 
 	.related_default_width,.wdproductcategory,.related_default_width {
 	    width:100%;
+	}
+	#tabbestseller-grid > li.double-slideitem,
+	#tablatest-grid > li.double-slideitem {
+		width: 100% !important;
 	}
 	.product-layout.product-grid {
 		width: 100%;

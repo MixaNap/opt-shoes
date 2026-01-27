@@ -36,10 +36,12 @@
 					{% endif %}
 					<div class="box-product {% if productCount >= sliderFor %}product-carousel{% else %} productbox-grid-hometab{% endif %}" id="{% if productCount >= sliderFor %}tabbestseller2-carousel{% else %}tabbestseller2-grid{% endif %}">
 						{% for product in bestsellersproducts %}
-						{% if loop.index % 2 == 1 %}
-						<li class="double-slideitem slider-item">
-							<ul>
+						{% if productCount >= sliderFor %}
+							{% if loop.index % 2 == 1 %}
+							<li class="double-slideitem slider-item">
+								<ul>
 							{% endif %}
+						{% endif %}
 							<div class="{% if productCount >= sliderFor %}slider-item{% else %}product-items{% endif %}">
 								<div class="product-block product-thumb transition">
 									<div class="product-block-inner">	  	
@@ -134,15 +136,21 @@
 								    });
 								 </script>
 							</div>
-							{% if loop.index % 2 != 1 %}
-							</ul>
-						</li>
+							{% if productCount >= sliderFor %}
+								{% if loop.index % 2 != 1 %}
+								</ul>
+							</li>
+						{% endif %}
 					{% endif %}
 						{% endfor %}
+						{% if productCount >= sliderFor and (productCount % 2) == 1 %}
+							</ul>
+						</li>
+						{% endif %}
 					</div>
 				</div>
 			 </div>
-			 <span class="tabbestseller_default_width" style="display:none; visibility:hidden"></span>
+			 <span class="tabbestseller2_default_width" style="display:block; position:absolute; visibility:hidden; height:0; overflow:hidden;"></span>
  </div>
 {% endif %}
 {% if latestproducts %}
@@ -161,10 +169,12 @@
 					{% endif %}
 					<div class="box-product {% if productCount >= sliderFor %}product-carousel{% else %} productbox-grid{% endif %}" id="{% if productCount >= sliderFor %}tablatest2-carousel{% else %}tablatest2-grid{% endif %}">
 					{% for product in latestproducts %}
-					{% if loop.index % 2 == 1 %}
-					<li class="double-slideitem slider-item">
-						<ul>
-							{% endif %}
+					{% if productCount >= sliderFor %}
+						{% if loop.index % 2 == 1 %}
+						<li class="double-slideitem slider-item">
+							<ul>
+						{% endif %}
+					{% endif %}
 							<div class="{% if productCount >= sliderFor %}slider-item{% else %}product-items{% endif %}">
 								<div class="product-block product-thumb transition">
 									<div class="product-block-inner">	  	
@@ -263,15 +273,21 @@
 								    });
 								 </script>
 							</div>
-							{% if loop.index % 2 != 1 %}
-							</ul>
-						</li>
+							{% if productCount >= sliderFor %}
+								{% if loop.index % 2 != 1 %}
+								</ul>
+							</li>
+						{% endif %}
 					{% endif %}
 						{% endfor %}
+						{% if productCount >= sliderFor and (productCount % 2) == 1 %}
+							</ul>
+						</li>
+						{% endif %}
 					</div>
 				</div>
 			 </div>
-			  <span class="tablatest_default_width" style="display:none; visibility:hidden"></span>
+			  <span class="tablatest2_default_width" style="display:block; position:absolute; visibility:hidden; height:0; overflow:hidden;"></span>
 				</div>
  </div>
 {% endif %}

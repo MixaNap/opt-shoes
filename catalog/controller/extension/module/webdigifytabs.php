@@ -8,6 +8,8 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 		$this->load->model('tool/image');
 
 		$data['bannerfirst'] = $this->load->controller('common/bannerfirst');
+		
+		$limit = 12;
 
 		// special product
 		
@@ -17,7 +19,7 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 			'sort'  => 'pd.name',
 			'order' => 'ASC',
 			'start' => 0,
-			'limit' => $setting['limit']
+			'limit' => $limit
 		);
 
 		$results = $this->model_catalog_product->getProductSpecials($filter_data);
@@ -113,10 +115,10 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 			'sort'  => 'p.date_added',
 			'order' => 'DESC',
 			'start' => 0,
-			'limit' => $setting['limit']
+			'limit' => $limit
 		);
 
-		$results = $this->model_catalog_product->getLatestProducts($setting['limit']);
+		$results = $this->model_catalog_product->getLatestProducts($limit);
 
 		if ($results) {
 			foreach ($results as $result) {
@@ -204,7 +206,7 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 		
 		$data['bestsellersproducts'] = array();
 
-		$results = $this->model_catalog_product->getBestSellerProducts($setting['limit']);
+		$results = $this->model_catalog_product->getBestSellerProducts($limit);
 
 		if ($results) {
 			foreach ($results as $result) {

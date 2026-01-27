@@ -98,7 +98,7 @@ class ControllerExtensionModuleWebdigifyTabs2 extends Controller {
 		} elseif (!empty($module_info)) {
 			$data['limit'] = $module_info['limit'];
 		} else {
-			$data['limit'] = 5;
+			$data['limit'] = 8;
 		}	
 
 		if (isset($this->request->post['width'])) {
