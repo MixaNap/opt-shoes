@@ -85,6 +85,16 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					$rating = false;
 				}
 
+				$sell_by_pack = isset($result['sell_by_pack']) ? (int)$result['sell_by_pack'] : 0;
+				$pack_size = isset($result['pack_size']) ? (int)$result['pack_size'] : 0;
+				$price_per_unit_formatted = false;
+				if ($sell_by_pack && $pack_size > 0) {
+					$price_for_calc = (!is_null($result['special']) && (float)$result['special'] >= 0) ? (float)$result['special'] : (float)$result['price'];
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$price_per_unit_formatted = $this->currency->format($this->tax->calculate($price_for_calc / $pack_size, $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					}
+				}
+
 				$data['specialproducts'][] = array(
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
@@ -99,6 +109,9 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					'rating'      => $rating,
 					'percentsaving'  => round((($result['price'] - $result['special'])/$result['price'])*100, 0),
 					'specialTime' => ($result['special_end']=='0000-00-00' || is_null($result['special_end'])) ? false : $result['special_end'],
+					'sell_by_pack' => $sell_by_pack,
+					'pack_size'    => $pack_size,
+					'price_per_unit_formatted' => $price_per_unit_formatted,
 					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id']),
 					'quick'        => $this->url->link('product/quick_view','&product_id=' . $result['product_id']),
 					'thumb_swap'  => $this->model_tool_image->resize($images , $setting['width'], $setting['height'])
@@ -181,6 +194,16 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					$rating = false;
 				}
 
+				$sell_by_pack = isset($result['sell_by_pack']) ? (int)$result['sell_by_pack'] : 0;
+				$pack_size = isset($result['pack_size']) ? (int)$result['pack_size'] : 0;
+				$price_per_unit_formatted = false;
+				if ($sell_by_pack && $pack_size > 0) {
+					$price_for_calc = (!is_null($result['special']) && (float)$result['special'] >= 0) ? (float)$result['special'] : (float)$result['price'];
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$price_per_unit_formatted = $this->currency->format($this->tax->calculate($price_for_calc / $pack_size, $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					}
+				}
+
 				$data['latestproducts'][] = array(
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
@@ -195,6 +218,9 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					'rating'      => $rating,
 					'percentsaving' => round((($result['price'] - $result['special'])/$result['price'])*100, 0),
 					'specialTime' => ($result['special_end']=='0000-00-00' || is_null($result['special_end'])) ? false : $result['special_end'],					
+					'sell_by_pack' => $sell_by_pack,
+					'pack_size'    => $pack_size,
+					'price_per_unit_formatted' => $price_per_unit_formatted,
 					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id']),
 					'quick'        => $this->url->link('product/quick_view','&product_id=' . $result['product_id']),
 					'thumb_swap'  => $this->model_tool_image->resize($images , $setting['width'], $setting['height'])
@@ -269,6 +295,16 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					$rating = false;
 				}
 
+				$sell_by_pack = isset($result['sell_by_pack']) ? (int)$result['sell_by_pack'] : 0;
+				$pack_size = isset($result['pack_size']) ? (int)$result['pack_size'] : 0;
+				$price_per_unit_formatted = false;
+				if ($sell_by_pack && $pack_size > 0) {
+					$price_for_calc = (!is_null($result['special']) && (float)$result['special'] >= 0) ? (float)$result['special'] : (float)$result['price'];
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$price_per_unit_formatted = $this->currency->format($this->tax->calculate($price_for_calc / $pack_size, $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					}
+				}
+
 				$data['bestsellersproducts'][] = array(
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
@@ -283,6 +319,9 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					'rating'      => $rating,
 					'percentsaving' => round((($result['price'] - $result['special'])/$result['price'])*100, 0),
 					'specialTime' => ($result['special_end']=='0000-00-00' || is_null($result['special_end'])) ? false : $result['special_end'],
+					'sell_by_pack' => $sell_by_pack,
+					'pack_size'    => $pack_size,
+					'price_per_unit_formatted' => $price_per_unit_formatted,
 					'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id']),
 					'quick'        => $this->url->link('product/quick_view','&product_id=' . $result['product_id']),
 					'thumb_swap'  => $this->model_tool_image->resize($images , $setting['width'], $setting['height'])

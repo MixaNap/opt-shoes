@@ -1946,6 +1946,23 @@ div#wdcmssubbanner .wdsubbanner {
 .tablatest2_default_width{ width:280px;}
 .tabspecial_default_width{ width:340px;}
 .featured_default_width{ width:340px;}
+.tab-price-inline {
+	font-weight: bold;
+	white-space: nowrap;
+}
+/* HomePage Product Tabs button */
+.hometab .action button.cart_button {
+	background: #ff6f61 !important;
+	color: #ffffff !important;
+	border: none !important;
+	padding: 12px 18px;
+	font-weight: bold;
+	line-height: 1.2;
+}
+.hometab .action button.cart_button:hover {
+	background: #000000 !important;
+	color: #ffffff !important;
+}
 .tab-content .tab {
     display: none;
 }
