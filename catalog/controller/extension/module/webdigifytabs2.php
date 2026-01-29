@@ -10,6 +10,24 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 		$data['bannerfirst'] = $this->load->controller('common/bannerfirst');
 		
 		$limit = 8;
+		$source_type = isset($setting['source_type']) ? $setting['source_type'] : 'latest';
+		$category_id = isset($setting['category_id']) ? (int)$setting['category_id'] : 0;
+		$filterByCategory = function($products) use ($category_id) {
+			if (!$category_id) {
+				return $products;
+			}
+			$filtered = array();
+			foreach ($products as $product) {
+				$categories = $this->model_catalog_product->getCategories($product['product_id']);
+				foreach ($categories as $category) {
+					if ((int)$category['category_id'] === $category_id) {
+						$filtered[$product['product_id']] = $product;
+						break;
+					}
+				}
+			}
+			return $filtered;
+		};
 
 		// special product
 		
@@ -23,6 +41,7 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 		);
 
 		$results = $this->model_catalog_product->getProductSpecials($filter_data);
+		$results = $filterByCategory($results);
 
 		if ($results) {
 			foreach ($results as $result) {
@@ -149,14 +168,19 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 		
 		$data['latestproducts'] = array();
 
-		$filter_data = array(
-			'sort'  => 'p.date_added',
-			'order' => 'DESC',
-			'start' => 0,
-			'limit' => $limit
-		);
-
-		$results = $this->model_catalog_product->getLatestProducts($limit);
+		switch ($source_type) {
+			case 'viewed':
+				$results = $this->model_catalog_product->getPopularProducts($limit);
+				break;
+			case 'bestseller':
+				$results = $this->model_catalog_product->getBestSellerProducts($limit);
+				break;
+			case 'latest':
+			default:
+				$results = $this->model_catalog_product->getLatestProducts($limit);
+				break;
+		}
+		$results = $filterByCategory($results);
 
 		if ($results) {
 			foreach ($results as $result) {
@@ -283,6 +307,7 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 		$data['bestsellersproducts'] = array();
 
 		$results = $this->model_catalog_product->getBestSellerProducts($limit);
+		$results = $filterByCategory($results);
 
 		if ($results) {
 			foreach ($results as $result) {

@@ -13,6 +13,13 @@ $_['entry_limit']      = 'Ліміт';
 $_['entry_width']      = 'Ширина';
 $_['entry_height']     = 'Висота';
 $_['entry_status']     = 'Статус';
+$_['entry_source_type'] = 'Джерело товарів';
+$_['entry_category']    = 'Категорія';
+
+$_['text_source_latest']     = 'Останні додані';
+$_['text_source_viewed']     = 'Найбільш переглянуті';
+$_['text_source_bestseller'] = 'Бестселери';
+$_['text_all_categories']    = 'Усі категорії';
 
 // Error
 $_['error_permission'] = 'Увага: У вас немає прав для зміни модуля HomePage Product Tabs 2!';

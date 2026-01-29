@@ -13,6 +13,13 @@ $_['entry_limit']      = 'Limit';
 $_['entry_width']      = 'Width';
 $_['entry_height']     = 'Height';
 $_['entry_status']     = 'Status';
+$_['entry_source_type'] = 'Product source';
+$_['entry_category']    = 'Category';
+
+$_['text_source_latest']     = 'Latest products';
+$_['text_source_viewed']     = 'Most viewed';
+$_['text_source_bestseller'] = 'Best sellers';
+$_['text_all_categories']    = 'All categories';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify Webdigifytabs module!';

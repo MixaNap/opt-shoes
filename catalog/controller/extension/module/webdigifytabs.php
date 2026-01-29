@@ -10,6 +10,24 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 		$data['bannerfirst'] = $this->load->controller('common/bannerfirst');
 		
 		$limit = 12;
+		$source_type = isset($setting['source_type']) ? $setting['source_type'] : 'latest';
+		$category_id = isset($setting['category_id']) ? (int)$setting['category_id'] : 0;
+		$filterByCategory = function($products) use ($category_id) {
+			if (!$category_id) {
+				return $products;
+			}
+			$filtered = array();
+			foreach ($products as $product) {
+				$categories = $this->model_catalog_product->getCategories($product['product_id']);
+				foreach ($categories as $category) {
+					if ((int)$category['category_id'] === $category_id) {
+						$filtered[$product['product_id']] = $product;
+						break;
+					}
+				}
+			}
+			return $filtered;
+		};
 
 		// special product
 		
@@ -23,6 +41,7 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 		);
 
 		$results = $this->model_catalog_product->getProductSpecials($filter_data);
+		$results = $filterByCategory($results);
 
 		if ($results) {
 			foreach ($results as $result) {
@@ -149,36 +168,19 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 		
 		$data['latestproducts'] = array();
 
-		$filter_data = array(
-			'sort'  => 'p.date_added',
-			'order' => 'DESC',
-			'start' => 0,
-			'limit' => $limit
-		);
-
-		$top_category_names = array('ТОП продаж', 'ТОП продажі', 'TOP продаж', 'Top продаж', 'TOP продажі', 'Top продажі');
-		$escaped_names = array();
-		foreach ($top_category_names as $name) {
-			$escaped_names[] = "'" . $this->db->escape($name) . "'";
+		switch ($source_type) {
+			case 'viewed':
+				$results = $this->model_catalog_product->getPopularProducts($limit);
+				break;
+			case 'bestseller':
+				$results = $this->model_catalog_product->getBestSellerProducts($limit);
+				break;
+			case 'latest':
+			default:
+				$results = $this->model_catalog_product->getLatestProducts($limit);
+				break;
 		}
-		$top_category_id = null;
-		$top_category_query = $this->db->query("SELECT category_id FROM " . DB_PREFIX . "category_description WHERE language_id = '" . (int)$this->config->get('config_language_id') . "' AND name IN (" . implode(',', $escaped_names) . ") LIMIT 1");
-		if ($top_category_query->num_rows) {
-			$top_category_id = (int)$top_category_query->row['category_id'];
-		}
-
-		if ($top_category_id) {
-			$filter_data = array(
-				'filter_category_id' => $top_category_id,
-				'sort'  => 'p.sort_order',
-				'order' => 'ASC',
-				'start' => 0,
-				'limit' => $limit
-			);
-			$results = $this->model_catalog_product->getProducts($filter_data);
-		} else {
-			$results = $this->model_catalog_product->getLatestProducts($limit);
-		}
+		$results = $filterByCategory($results);
 
 		if ($results) {
 			foreach ($results as $result) {
@@ -305,6 +307,7 @@ class ControllerExtensionModuleWebdigifytabs extends Controller {
 		$data['bestsellersproducts'] = array();
 
 		$results = $this->model_catalog_product->getBestSellerProducts($limit);
+		$results = $filterByCategory($results);
 
 		if ($results) {
 			foreach ($results as $result) {

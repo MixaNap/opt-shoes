@@ -8,6 +8,7 @@ class ControllerExtensionModuleWebdigifyTabs extends Controller {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('setting/module');
+		$this->load->model('catalog/category');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			if (!isset($this->request->get['module_id'])) {
@@ -124,6 +125,35 @@ class ControllerExtensionModuleWebdigifyTabs extends Controller {
 		} else {
 			$data['status'] = '';
 		}
+
+		if (isset($this->request->post['source_type'])) {
+			$data['source_type'] = $this->request->post['source_type'];
+		} elseif (!empty($module_info) && isset($module_info['source_type'])) {
+			$data['source_type'] = $module_info['source_type'];
+		} else {
+			$data['source_type'] = 'latest';
+		}
+
+		if (isset($this->request->post['category_id'])) {
+			$data['category_id'] = (int)$this->request->post['category_id'];
+		} elseif (!empty($module_info) && isset($module_info['category_id'])) {
+			$data['category_id'] = (int)$module_info['category_id'];
+		} else {
+			$data['category_id'] = 0;
+		}
+
+		$data['categories'] = array();
+		$build_categories = function($parent_id = 0, $prefix = '') use (&$build_categories, &$data) {
+			$categories = $this->model_catalog_category->getCategories($parent_id);
+			foreach ($categories as $category) {
+				$data['categories'][] = array(
+					'category_id' => $category['category_id'],
+					'name'        => $prefix . $category['name']
+				);
+				$build_categories($category['category_id'], $prefix . '-- ');
+			}
+		};
+		$build_categories(0, '');
 		
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

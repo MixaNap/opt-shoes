@@ -72,6 +72,27 @@
               </select>
             </div>
           </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-source-type">{{ entry_source_type }}</label>
+            <div class="col-sm-10">
+              <select name="source_type" id="input-source-type" class="form-control">
+                <option value="latest" {% if source_type == 'latest' %}selected="selected"{% endif %}>{{ text_source_latest }}</option>
+                <option value="viewed" {% if source_type == 'viewed' %}selected="selected"{% endif %}>{{ text_source_viewed }}</option>
+                <option value="bestseller" {% if source_type == 'bestseller' %}selected="selected"{% endif %}>{{ text_source_bestseller }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-category">{{ entry_category }}</label>
+            <div class="col-sm-10">
+              <select name="category_id" id="input-category" class="form-control">
+                <option value="0" {% if category_id == 0 %}selected="selected"{% endif %}>{{ text_all_categories }}</option>
+                {% for category in categories %}
+                  <option value="{{ category.category_id }}" {% if category.category_id == category_id %}selected="selected"{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
         </form>
       </div>
     </div>

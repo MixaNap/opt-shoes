@@ -115,6 +115,9 @@ $files_to_update = [
     'image/catalog/2026-01-14 11.17.17-833x1000.webp',
 
     // HomePage Product Tabs 2 (новий модуль)
+    'admin/controller/extension/module/webdigifytabs.php',
+    'admin/view/template/extension/module/webdigifytabs.twig',
+    'admin/language/en-gb/extension/module/webdigifytabs.php',
     'admin/controller/extension/module/webdigifytabs2.php',
     'admin/view/template/extension/module/webdigifytabs2.twig',
     'admin/language/en-gb/extension/module/webdigifytabs2.php',
