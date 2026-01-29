@@ -134,7 +134,7 @@ $failed = 0;
 $errors = [];
 
 foreach ($files_to_update as $file) {
-    $url = $github_base . $file;
+    $url = $github_base . str_replace(' ', '%20', $file);
     $destination = $baseDir . '/' . $file;
     
     echo "Updating: $file... ";
