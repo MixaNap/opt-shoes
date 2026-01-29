@@ -20,6 +20,7 @@ $_['text_source_latest']     = 'Останні додані';
 $_['text_source_viewed']     = 'Найбільш переглянуті';
 $_['text_source_bestseller'] = 'Бестселери';
 $_['text_all_categories']    = 'Усі категорії';
+$_['text_category_help']       = 'Залиште порожнім, щоб показати всі категорії.';
 
 // Error
 $_['error_permission'] = 'Увага: У вас немає прав для зміни модуля HomePage Product Tabs 2!';

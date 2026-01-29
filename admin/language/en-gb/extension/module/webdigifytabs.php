@@ -20,6 +20,7 @@ $_['text_source_latest']     = 'Latest products';
 $_['text_source_viewed']     = 'Most viewed';
 $_['text_source_bestseller'] = 'Best sellers';
 $_['text_all_categories']    = 'All categories';
+$_['text_category_help']       = 'Leave empty to show all categories.';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify Webdigifytabs module!';

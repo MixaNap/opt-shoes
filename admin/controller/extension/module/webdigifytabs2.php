@@ -142,9 +142,13 @@ class ControllerExtensionModuleWebdigifyTabs2 extends Controller {
 			$data['category_id'] = 0;
 		}
 
-		$data['categories'] = $this->model_catalog_category->getCategories(array(
-			'sort' => 'name'
-		));
+		$data['category_name'] = '';
+		if ($data['category_id']) {
+			$category_info = $this->model_catalog_category->getCategory($data['category_id']);
+			if ($category_info) {
+				$data['category_name'] = $category_info['name'];
+			}
+		}
 		
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
