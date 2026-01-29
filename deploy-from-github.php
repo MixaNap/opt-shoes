@@ -101,6 +101,16 @@ echo "========================================\n\n";
 
 // Список файлів для оновлення
 $files_to_update = [
+    // Pack pricing rounding changes
+    'system/library/cart/cart.php',
+    'catalog/controller/product/product.php',
+    'catalog/controller/product/category.php',
+    'catalog/controller/checkout/cart.php',
+    'catalog/controller/common/cart.php',
+    'catalog/controller/extension/d_quickcheckout/cart.php',
+    'catalog/controller/extension/module/webdigifytabs.php',
+    'catalog/controller/extension/module/webdigifytabs2.php',
+
     // HomePage Product Tabs 2 (новий модуль)
     'admin/controller/extension/module/webdigifytabs2.php',
     'admin/view/template/extension/module/webdigifytabs2.twig',
