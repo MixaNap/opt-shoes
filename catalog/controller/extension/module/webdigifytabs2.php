@@ -92,24 +92,30 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					$price_for_calc = (!is_null($result['special']) && (float)$result['special'] >= 0) ? (float)$result['special'] : (float)$result['price'];
 					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 						$current_currency = $this->session->data['currency'];
-						$decimal_place = (int)$this->currency->getDecimalPlace($current_currency);
+						$unit_round_precision = 0;
+						$symbol_left = $this->currency->getSymbolLeft($current_currency);
+						$symbol_right = $this->currency->getSymbolRight($current_currency);
+						$format_price_int = function($amount) use ($symbol_left, $symbol_right) {
+							$amount = round((float)$amount, 0);
+							return $symbol_left . number_format($amount, 0, '.', ' ') . $symbol_right;
+						};
 						
 						$price_per_unit_base = $price_for_calc / $pack_size;
 						$price_per_unit_with_tax_base = $this->tax->calculate($price_per_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
 						$price_per_unit_with_tax_converted = $this->currency->convert($price_per_unit_with_tax_base, 'USD', $current_currency);
-						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $decimal_place);
-						$price_per_unit_formatted = $this->currency->format($price_per_unit_with_tax_rounded, $current_currency, 1);
+						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $unit_round_precision);
+						$price_per_unit_formatted = $format_price_int($price_per_unit_with_tax_rounded);
 						
 						$pack_price_with_tax = $price_per_unit_with_tax_rounded * $pack_size;
-						$price = $this->currency->format($pack_price_with_tax, $current_currency, 1);
+						$price = $format_price_int($pack_price_with_tax);
 						
 						if (!is_null($result['special']) && (float)$result['special'] >= 0) {
 							$special_unit_base = (float)$result['special'] / $pack_size;
 							$special_unit_with_tax_base = $this->tax->calculate($special_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
 							$special_unit_with_tax_converted = $this->currency->convert($special_unit_with_tax_base, 'USD', $current_currency);
-							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $decimal_place);
+							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $unit_round_precision);
 							$special_pack_with_tax = $special_unit_with_tax_rounded * $pack_size;
-							$special = $this->currency->format($special_pack_with_tax, $current_currency, 1);
+							$special = $format_price_int($special_pack_with_tax);
 						}
 					}
 				}
@@ -220,24 +226,30 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					$price_for_calc = (!is_null($result['special']) && (float)$result['special'] >= 0) ? (float)$result['special'] : (float)$result['price'];
 					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 						$current_currency = $this->session->data['currency'];
-						$decimal_place = (int)$this->currency->getDecimalPlace($current_currency);
+						$unit_round_precision = 0;
+						$symbol_left = $this->currency->getSymbolLeft($current_currency);
+						$symbol_right = $this->currency->getSymbolRight($current_currency);
+						$format_price_int = function($amount) use ($symbol_left, $symbol_right) {
+							$amount = round((float)$amount, 0);
+							return $symbol_left . number_format($amount, 0, '.', ' ') . $symbol_right;
+						};
 						
 						$price_per_unit_base = $price_for_calc / $pack_size;
 						$price_per_unit_with_tax_base = $this->tax->calculate($price_per_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
 						$price_per_unit_with_tax_converted = $this->currency->convert($price_per_unit_with_tax_base, 'USD', $current_currency);
-						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $decimal_place);
-						$price_per_unit_formatted = $this->currency->format($price_per_unit_with_tax_rounded, $current_currency, 1);
+						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $unit_round_precision);
+						$price_per_unit_formatted = $format_price_int($price_per_unit_with_tax_rounded);
 						
 						$pack_price_with_tax = $price_per_unit_with_tax_rounded * $pack_size;
-						$price = $this->currency->format($pack_price_with_tax, $current_currency, 1);
+						$price = $format_price_int($pack_price_with_tax);
 						
 						if (!is_null($result['special']) && (float)$result['special'] >= 0) {
 							$special_unit_base = (float)$result['special'] / $pack_size;
 							$special_unit_with_tax_base = $this->tax->calculate($special_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
 							$special_unit_with_tax_converted = $this->currency->convert($special_unit_with_tax_base, 'USD', $current_currency);
-							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $decimal_place);
+							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $unit_round_precision);
 							$special_pack_with_tax = $special_unit_with_tax_rounded * $pack_size;
-							$special = $this->currency->format($special_pack_with_tax, $current_currency, 1);
+							$special = $format_price_int($special_pack_with_tax);
 						}
 					}
 				}
@@ -340,24 +352,30 @@ class ControllerExtensionModuleWebdigifytabs2 extends Controller {
 					$price_for_calc = (!is_null($result['special']) && (float)$result['special'] >= 0) ? (float)$result['special'] : (float)$result['price'];
 					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 						$current_currency = $this->session->data['currency'];
-						$decimal_place = (int)$this->currency->getDecimalPlace($current_currency);
+						$unit_round_precision = 0;
+						$symbol_left = $this->currency->getSymbolLeft($current_currency);
+						$symbol_right = $this->currency->getSymbolRight($current_currency);
+						$format_price_int = function($amount) use ($symbol_left, $symbol_right) {
+							$amount = round((float)$amount, 0);
+							return $symbol_left . number_format($amount, 0, '.', ' ') . $symbol_right;
+						};
 						
 						$price_per_unit_base = $price_for_calc / $pack_size;
 						$price_per_unit_with_tax_base = $this->tax->calculate($price_per_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
 						$price_per_unit_with_tax_converted = $this->currency->convert($price_per_unit_with_tax_base, 'USD', $current_currency);
-						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $decimal_place);
-						$price_per_unit_formatted = $this->currency->format($price_per_unit_with_tax_rounded, $current_currency, 1);
+						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $unit_round_precision);
+						$price_per_unit_formatted = $format_price_int($price_per_unit_with_tax_rounded);
 						
 						$pack_price_with_tax = $price_per_unit_with_tax_rounded * $pack_size;
-						$price = $this->currency->format($pack_price_with_tax, $current_currency, 1);
+						$price = $format_price_int($pack_price_with_tax);
 						
 						if (!is_null($result['special']) && (float)$result['special'] >= 0) {
 							$special_unit_base = (float)$result['special'] / $pack_size;
 							$special_unit_with_tax_base = $this->tax->calculate($special_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
 							$special_unit_with_tax_converted = $this->currency->convert($special_unit_with_tax_base, 'USD', $current_currency);
-							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $decimal_place);
+							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $unit_round_precision);
 							$special_pack_with_tax = $special_unit_with_tax_rounded * $pack_size;
-							$special = $this->currency->format($special_pack_with_tax, $current_currency, 1);
+							$special = $format_price_int($special_pack_with_tax);
 						}
 					}
 				}

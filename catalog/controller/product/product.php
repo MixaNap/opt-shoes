@@ -371,11 +371,17 @@ class ControllerProductProduct extends Controller {
 			$data['percentsaving'] = round((($data['price_numeric'] - ($data['special_numeric'] !== false ? $data['special_numeric'] : $data['price_numeric']))/$data['price_numeric'])*100, 0);
 			
 			if ($data['sell_by_pack'] && $data['pack_size'] > 0) {
-				$decimal_place = (int)$this->currency->getDecimalPlace($current_currency);
+				$unit_round_precision = 0;
+				$symbol_left = $this->currency->getSymbolLeft($current_currency);
+				$symbol_right = $this->currency->getSymbolRight($current_currency);
+				$format_price_int = function($amount) use ($symbol_left, $symbol_right) {
+					$amount = round((float)$amount, 0);
+					return $symbol_left . number_format($amount, 0, '.', ' ') . $symbol_right;
+				};
 				
 				// Розраховуємо ціну за штуку з базової ціни (вже конвертованої в грн для JavaScript)
 				$unit_price_raw = (float)$price_converted / $data['pack_size'];
-				$unit_price_rounded = round($unit_price_raw, $decimal_place);
+				$unit_price_rounded = round($unit_price_raw, $unit_round_precision);
 				$data['price_per_unit'] = (float)$unit_price_rounded;
 				// Для JavaScript потрібна ціна БЕЗ податків (вже конвертована) з округленням
 				$data['price_per_unit_numeric'] = (float)$unit_price_rounded;
@@ -387,13 +393,13 @@ class ControllerProductProduct extends Controller {
 					$price_per_unit_base = (float)$product_info['price'] / $data['pack_size'];
 					$price_per_unit_with_tax_base = $this->tax->calculate($price_per_unit_base, $product_info['tax_class_id'], $this->config->get('config_tax'));
 					$price_per_unit_with_tax_converted = $this->currency->convert($price_per_unit_with_tax_base, 'USD', $current_currency);
-					$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $decimal_place);
+					$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $unit_round_precision);
 					
-					$data['price_per_unit_formatted'] = $this->currency->format($price_per_unit_with_tax_rounded, $current_currency, 1);
+					$data['price_per_unit_formatted'] = $format_price_int($price_per_unit_with_tax_rounded);
 					
 					// Ціна за упаковку через округлену ціну за штуку
 					$price_per_pack_with_tax = $price_per_unit_with_tax_rounded * $data['pack_size'];
-					$data['price'] = $this->currency->format($price_per_pack_with_tax, $current_currency, 1);
+					$data['price'] = $format_price_int($price_per_pack_with_tax);
 					$data['price_per_pack_formatted'] = $data['price'];
 					$data['price_numeric_formatted'] = (float)$price_per_pack_with_tax;
 				}
@@ -401,7 +407,7 @@ class ControllerProductProduct extends Controller {
 				// Розраховуємо спеціальну ціну, якщо вона є
 				if ($data['special_numeric'] !== false) {
 					$special_unit_raw = (float)$special_converted / $data['pack_size'];
-					$special_unit_rounded = round($special_unit_raw, $decimal_place);
+					$special_unit_rounded = round($special_unit_raw, $unit_round_precision);
 					$data['special_per_unit_numeric'] = (float)$special_unit_rounded;
 					$data['special_numeric'] = (float)($special_unit_rounded * $data['pack_size']);
 					
@@ -409,12 +415,12 @@ class ControllerProductProduct extends Controller {
 						$special_per_unit_base = (float)$product_info['special'] / $data['pack_size'];
 						$special_per_unit_with_tax_base = $this->tax->calculate($special_per_unit_base, $product_info['tax_class_id'], $this->config->get('config_tax'));
 						$special_per_unit_with_tax_converted = $this->currency->convert($special_per_unit_with_tax_base, 'USD', $current_currency);
-						$special_per_unit_with_tax_rounded = round($special_per_unit_with_tax_converted, $decimal_place);
+						$special_per_unit_with_tax_rounded = round($special_per_unit_with_tax_converted, $unit_round_precision);
 						
-						$data['special_per_unit_formatted'] = $this->currency->format($special_per_unit_with_tax_rounded, $current_currency, 1);
+						$data['special_per_unit_formatted'] = $format_price_int($special_per_unit_with_tax_rounded);
 						
 						$special_per_pack_with_tax = $special_per_unit_with_tax_rounded * $data['pack_size'];
-						$data['special'] = $this->currency->format($special_per_pack_with_tax, $current_currency, 1);
+						$data['special'] = $format_price_int($special_per_pack_with_tax);
 						$data['special_per_pack_formatted'] = $data['special'];
 						$data['special_numeric_formatted'] = (float)$special_per_pack_with_tax;
 					}
