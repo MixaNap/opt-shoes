@@ -235,6 +235,8 @@ class ControllerProductCategory extends Controller {
 				$sell_by_pack = isset($result['sell_by_pack']) ? (int)$result['sell_by_pack'] : 0;
 				$pack_size = isset($result['pack_size']) ? (int)$result['pack_size'] : 0;
 				$price_per_unit_formatted = false;
+				$price_per_pack_formatted = false;
+				$special_per_pack_formatted = false;
 				
 				if ($sell_by_pack && $pack_size > 0) {
 					$current_currency = $this->session->data['currency'];
@@ -250,6 +252,7 @@ class ControllerProductCategory extends Controller {
 						// Ціна за упаковку через округлену ціну за штуку
 						$pack_price_with_tax = $price_per_unit_with_tax_rounded * $pack_size;
 						$price = $this->currency->format($pack_price_with_tax, $current_currency, 1);
+						$price_per_pack_formatted = $price;
 						
 						if (!is_null($result['special']) && (float)$result['special'] >= 0) {
 							$special_unit_base = (float)$result['special'] / $pack_size;
@@ -258,6 +261,7 @@ class ControllerProductCategory extends Controller {
 							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $decimal_place);
 							$special_pack_with_tax = $special_unit_with_tax_rounded * $pack_size;
 							$special = $this->currency->format($special_pack_with_tax, $current_currency, 1);
+							$special_per_pack_formatted = $special;
 						}
 					}
 				}
@@ -307,6 +311,8 @@ class ControllerProductCategory extends Controller {
 					'specialTime' => ($result['special_end']=='0000-00-00' || is_null($result['special_end'])) ? false : $result['special_end'],
 					'sell_by_pack' => $sell_by_pack,
 					'pack_size'    => $pack_size,
+					'price_per_pack_formatted' => $price_per_pack_formatted,
+					'special_per_pack_formatted' => $special_per_pack_formatted,
 					'price_per_unit_formatted' => $price_per_unit_formatted,
 					'sku'          => isset($result['sku']) ? $result['sku'] : '',
 					'model'        => isset($result['model']) ? $result['model'] : '',

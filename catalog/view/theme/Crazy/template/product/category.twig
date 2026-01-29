@@ -162,7 +162,11 @@
               {% if product.sell_by_pack and product.pack_size > 0 %}
                 <div style="margin: 8px 0; font-size: 0.9em; color: #333;">
                   <strong>упак. ({{ product.pack_size }} шт):</strong> 
-                  {% if not product.special %}
+                  {% if product.special_per_pack_formatted is defined and product.special_per_pack_formatted %}
+                    <strong>{{ product.special_per_pack_formatted }}</strong>
+                  {% elseif product.price_per_pack_formatted is defined and product.price_per_pack_formatted %}
+                    <strong>{{ product.price_per_pack_formatted }}</strong>
+                  {% elseif not product.special %}
                     <strong>{{ product.price }}</strong>
                   {% else %}
                     <strong>{{ product.special }}</strong>

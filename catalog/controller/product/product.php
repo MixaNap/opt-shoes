@@ -325,6 +325,8 @@ class ControllerProductProduct extends Controller {
 			$data['price_per_unit'] = false;
 			$data['price_per_unit_formatted'] = false;
 			$data['special_per_unit_formatted'] = false;
+			$data['price_per_pack_formatted'] = false;
+			$data['special_per_pack_formatted'] = false;
 			
 			// Числові значення цін для JavaScript (вже в поточній валюті - грн)
 			$data['price_numeric'] = (float)$price_converted;
@@ -392,6 +394,7 @@ class ControllerProductProduct extends Controller {
 					// Ціна за упаковку через округлену ціну за штуку
 					$price_per_pack_with_tax = $price_per_unit_with_tax_rounded * $data['pack_size'];
 					$data['price'] = $this->currency->format($price_per_pack_with_tax, $current_currency, 1);
+					$data['price_per_pack_formatted'] = $data['price'];
 					$data['price_numeric_formatted'] = (float)$price_per_pack_with_tax;
 				}
 				
@@ -412,6 +415,7 @@ class ControllerProductProduct extends Controller {
 						
 						$special_per_pack_with_tax = $special_per_unit_with_tax_rounded * $data['pack_size'];
 						$data['special'] = $this->currency->format($special_per_pack_with_tax, $current_currency, 1);
+						$data['special_per_pack_formatted'] = $data['special'];
 						$data['special_numeric_formatted'] = (float)$special_per_pack_with_tax;
 					}
 				}

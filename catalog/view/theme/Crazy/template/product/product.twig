@@ -164,7 +164,14 @@
               <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
                 <div style="font-size: 1.2em; font-weight: bold; color: #333;">
                   Ціна упаковки ({{ pack_size }} пар): 
-                  {% if not special %}
+                  {% if special_per_pack_formatted is defined and special_per_pack_formatted %}
+                    <span style="text-decoration: line-through; color: #999; font-size: 0.9em; font-weight: normal;">
+                      {{ price_per_pack_formatted is defined and price_per_pack_formatted ? price_per_pack_formatted : price }}
+                    </span>
+                    <strong style="color: #d9534f;">{{ special_per_pack_formatted }}</strong>
+                  {% elseif price_per_pack_formatted is defined and price_per_pack_formatted %}
+                    <strong>{{ price_per_pack_formatted }}</strong>
+                  {% elseif not special %}
                     <strong>{{ price }}</strong>
                   {% else %}
                     <span style="text-decoration: line-through; color: #999; font-size: 0.9em; font-weight: normal;">{{ price }}</span>
