@@ -142,18 +142,9 @@ class ControllerExtensionModuleWebdigifyTabs extends Controller {
 			$data['category_id'] = 0;
 		}
 
-		$data['categories'] = array();
-		$build_categories = function($parent_id = 0, $prefix = '') use (&$build_categories, &$data) {
-			$categories = $this->model_catalog_category->getCategories($parent_id);
-			foreach ($categories as $category) {
-				$data['categories'][] = array(
-					'category_id' => $category['category_id'],
-					'name'        => $prefix . $category['name']
-				);
-				$build_categories($category['category_id'], $prefix . '-- ');
-			}
-		};
-		$build_categories(0, '');
+		$data['categories'] = $this->model_catalog_category->getCategories(array(
+			'sort' => 'name'
+		));
 		
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
