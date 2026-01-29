@@ -237,10 +237,28 @@ class ControllerProductCategory extends Controller {
 				$price_per_unit_formatted = false;
 				
 				if ($sell_by_pack && $pack_size > 0) {
+					$current_currency = $this->session->data['currency'];
+					$decimal_place = (int)$this->currency->getDecimalPlace($current_currency);
 					$price_for_calc = !is_null($result['special']) && (float)$result['special'] >= 0 ? (float)$result['special'] : (float)$result['price'];
 					$price_per_unit = $price_for_calc / $pack_size;
 					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-						$price_per_unit_formatted = $this->currency->format($this->tax->calculate($price_per_unit, $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+						$price_per_unit_with_tax_base = $this->tax->calculate($price_per_unit, $result['tax_class_id'], $this->config->get('config_tax'));
+						$price_per_unit_with_tax_converted = $this->currency->convert($price_per_unit_with_tax_base, 'USD', $current_currency);
+						$price_per_unit_with_tax_rounded = round($price_per_unit_with_tax_converted, $decimal_place);
+						$price_per_unit_formatted = $this->currency->format($price_per_unit_with_tax_rounded, $current_currency, 1);
+						
+						// Ціна за упаковку через округлену ціну за штуку
+						$pack_price_with_tax = $price_per_unit_with_tax_rounded * $pack_size;
+						$price = $this->currency->format($pack_price_with_tax, $current_currency, 1);
+						
+						if (!is_null($result['special']) && (float)$result['special'] >= 0) {
+							$special_unit_base = (float)$result['special'] / $pack_size;
+							$special_unit_with_tax_base = $this->tax->calculate($special_unit_base, $result['tax_class_id'], $this->config->get('config_tax'));
+							$special_unit_with_tax_converted = $this->currency->convert($special_unit_with_tax_base, 'USD', $current_currency);
+							$special_unit_with_tax_rounded = round($special_unit_with_tax_converted, $decimal_place);
+							$special_pack_with_tax = $special_unit_with_tax_rounded * $pack_size;
+							$special = $this->currency->format($special_pack_with_tax, $current_currency, 1);
+						}
 					}
 				}
 

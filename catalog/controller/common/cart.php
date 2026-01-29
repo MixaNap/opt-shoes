@@ -108,11 +108,13 @@ class ControllerCommonCart extends Controller {
 					// $product['price'] містить ціну за одиницю (з урахуванням знижок)
 					// $unit_price = ціна за одиницю з податками
 					// Ціна за упаковку = ціна за одиницю * розмір упаковки
-					$price_per_pack_numeric = $unit_price * $pack_size;
+					$decimal_place = (int)$this->currency->getDecimalPlace($this->session->data['currency']);
+					$unit_price_rounded = round((float)$unit_price, $decimal_place);
+					$price_per_pack_numeric = $unit_price_rounded * $pack_size;
 					$price_per_pack = $this->currency->format($price_per_pack_numeric, $this->session->data['currency'], 1);
 					
 					// Ціна за одиницю з податками (для відображення)
-					$price_per_unit_formatted = $this->currency->format($unit_price, $this->session->data['currency'], 1);
+					$price_per_unit_formatted = $this->currency->format($unit_price_rounded, $this->session->data['currency'], 1);
 					
 					// Ціна за упаковку для відображення
 					$price = $price_per_pack;

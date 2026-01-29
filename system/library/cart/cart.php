@@ -273,10 +273,16 @@ class Cart {
 						$quantity_packs = 1;
 					}
 					$quantity_for_total = $quantity_packs;
-					// Для totals використовуємо ціну за упаковку * кількість упаковок
-					$total_price = $price_converted * $quantity_for_total;
-					// Для відображення потрібна ціна за одиницю = ціна за упаковку / розмір упаковки
-					$price_per_unit_converted = $price_converted / $pack_size;
+					
+					// Для totals використовуємо ціну за упаковку, перераховану через округлену ціну за одиницю
+					$decimal_place = (int)$this->currency->getDecimalPlace($current_currency);
+					$unit_price_raw = $price_converted / $pack_size;
+					$unit_price_rounded = round($unit_price_raw, $decimal_place);
+					$pack_price_rounded = $unit_price_rounded * $pack_size;
+					$total_price = $pack_price_rounded * $quantity_for_total;
+					
+					// Для відображення потрібна ціна за одиницю = округлена ціна за одиницю
+					$price_per_unit_converted = $unit_price_rounded;
 				} else {
 					// Для товарів що продаються поштучно: quantity_for_total = quantity (штуки), price_converted = ціна за одиницю
 					$quantity_for_total = $cart['quantity'];

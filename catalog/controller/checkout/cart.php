@@ -169,10 +169,11 @@ class ControllerCheckoutCart extends Controller {
 						// Це вже розраховано в cart.php як: ціна за упаковку з БД / pack_size
 						// $price_with_tax = ціна за одиницю з податками
 						// Ціна за упаковку = ціна за одиницю * розмір упаковки
-						$price_per_pack_with_tax = $price_with_tax * $pack_size;
+						$unit_price_with_tax_rounded = round((float)$price_with_tax, (int)$decimal_place);
+						$price_per_pack_with_tax = $unit_price_with_tax_rounded * $pack_size;
 						$price_per_pack = $format_price($price_per_pack_with_tax);
 						// Ціна за одиницю з податками (для відображення)
-						$price_per_unit_formatted = $format_price($price_with_tax);
+						$price_per_unit_formatted = $format_price($unit_price_with_tax_rounded);
 						// Ціна за упаковку для відображення
 						$price = $price_per_pack;
 						// Загальна вартість = кількість упаковок * ціна за упаковку з податками

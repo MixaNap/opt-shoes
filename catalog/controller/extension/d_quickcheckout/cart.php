@@ -198,9 +198,11 @@ class ControllerExtensionDQuickcheckoutCart extends Controller {
                 
                 // Розраховуємо ціну за одиницю з податками
                 $unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
+                $decimal_place = (int)$this->currency->getDecimalPlace($this->session->data['currency']);
+                $unit_price_rounded = round((float)$unit_price, $decimal_place);
                 
                 // Для відображення ціни за шт. використовуємо ціну за одиницю
-                $price = $this->currency->format($unit_price, $this->session->data['currency'], 1);
+                $price = $this->currency->format($unit_price_rounded, $this->session->data['currency'], 1);
                 
                 // Розраховуємо загальну вартість
                 if ($sell_by_pack && $pack_size > 0) {
@@ -210,14 +212,14 @@ class ControllerExtensionDQuickcheckoutCart extends Controller {
                     if ($quantity_packs < 1 && $product['quantity'] > 0) {
                         $quantity_packs = 1;
                     }
-                    // Ціна за упаковку = ціна за одиницю * розмір упаковки
-                    $price_per_pack = $unit_price * $pack_size;
+                    // Ціна за упаковку = округлена ціна за одиницю * розмір упаковки
+                    $price_per_pack = $unit_price_rounded * $pack_size;
                     // Загальна вартість = ціна за упаковку * кількість упаковок
                     $total_price = $price_per_pack * $quantity_packs;
                 } else {
                     // Товар продається поштучно
                     // Загальна вартість = ціна за одиницю * кількість
-                    $total_price = $unit_price * $product['quantity'];
+                    $total_price = $unit_price_rounded * $product['quantity'];
                 }
                 
                 $total = $this->currency->format($total_price, $this->session->data['currency'], 1);
