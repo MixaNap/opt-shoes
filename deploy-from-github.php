@@ -112,6 +112,7 @@ $files_to_update = [
     'catalog/controller/extension/module/webdigifytabs2.php',
     'catalog/view/theme/Crazy/template/product/product.twig',
     'catalog/view/theme/Crazy/template/product/category.twig',
+    'image/catalog/2026-01-14 11.17.17-833x1000.webp',
 
     // HomePage Product Tabs 2 (новий модуль)
     'admin/controller/extension/module/webdigifytabs2.php',
