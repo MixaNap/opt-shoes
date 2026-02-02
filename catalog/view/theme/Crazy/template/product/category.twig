@@ -25,23 +25,14 @@
 
           <div class="col-sm-12 category_details">
             <h2 class="page-title">{{ heading_title }}</h2>
-            {% if description %}
-            <div class="category_description">{{ description }}</div>
-            {% endif %}
               {% if categories %}
           <h3 class="refine-search">{{ text_refine }}</h3>
-          <div class="category_list">
-          <ul>
+          <div class="category_list" style="display: flex; flex-wrap: wrap; gap: 10px;">
             {% for category in categories %}
-                <div class="category-item">
-                {% if category.img %}
-                  <div class="category_img"><a href="{{ category.href }}"><img src="{{ category.img }}" data-rel="{{ category.img }}" alt="{{ category.name }}" title="{{ category.name }}" class="img-thumbnail"  /></a></div>
-                  {% endif %}
-                
-                <a href="{{ category.href }}">{{ category.name }}</a>
-                </div>   
-              {% endfor %}
-            </ul>
+              <a href="{{ category.href }}" class="btn btn-default" style="border-radius: 6px; padding: 8px 14px; white-space: nowrap;">
+                {{ category.name }}
+              </a>
+            {% endfor %}
           </div>
       {% endif %}
           </div>
@@ -226,12 +217,15 @@
         <div class="col-sm-6 text-right page-result">{{ results }}</div>  
       <div class="col-sm-6 text-left page-link">{{ pagination }}</div>
       
-     </div>     
+     </div>
       {% else %}
       <p>{{ text_empty }}</p>
       <div class="buttons">
         <div class="pull-right"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
       </div>
+      {% endif %}
+      {% if description %}
+      <div class="category_description" style="margin-top: 20px;">{{ description }}</div>
       {% endif %}
       {{ content_bottom }}</div>
       {{ column_right }}</div>
