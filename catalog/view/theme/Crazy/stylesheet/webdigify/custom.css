@@ -109,11 +109,11 @@ span.customSelect.changed {
     font-size: 10px;
 }
 
-.treeview-list li.has-children > a {
+.treeview-list.no-hitarea li.has-children > a {
 	position: relative;
 	padding-right: 16px;
 }
-.treeview-list li.has-children > a::after {
+.treeview-list.no-hitarea li.has-children > a::after {
 	content: "+";
 	position: absolute;
 	right: 0;
@@ -122,7 +122,7 @@ span.customSelect.changed {
 	font-size: 12px;
 	line-height: 1;
 }
-.treeview-list li.collapsable > a::after {
+.treeview-list.no-hitarea li.collapsable > a::after {
 	content: "-";
 }
 
