@@ -25,38 +25,33 @@ class ControllerExtensionModuleCategory extends Controller {
 
 		$this->load->model('catalog/category');
 
-		$this->load->model('catalog/product');
-
 		$data['categories'] = array();
+		$data['first_open_id'] = 0;
 
 		$categories = $this->model_catalog_category->getCategories(0);
 
 		foreach ($categories as $category) {
 			$children_data = array();
-		
-			if ($category['category_id'] == $data['category_id']) {
-				$children = $this->model_catalog_category->getCategories($category['category_id']);
-		
-				foreach($children as $child) {
-					$filter_data = array('filter_category_id' => $child['category_id'], 'filter_sub_category' => true);
-		
-					$children_data[] = array(
-						'category_id' => $child['category_id'],
-						'name' => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
-						'href' => $this->url->link('product/category', 'path=' . $category['category_id'] . '_' . $child['category_id'])
-					);
-				}
+			$children = $this->model_catalog_category->getCategories($category['category_id']);
+			$has_children = !empty($children);
+
+			if (!$data['first_open_id'] && $has_children) {
+				$data['first_open_id'] = $category['category_id'];
 			}
 
-			$filter_data = array(
-				'filter_category_id'  => $category['category_id'],
-				'filter_sub_category' => true
-			);
+			foreach ($children as $child) {
+				$children_data[] = array(
+					'category_id' => $child['category_id'],
+					'name' => $child['name'],
+					'href' => $this->url->link('product/category', 'path=' . $category['category_id'] . '_' . $child['category_id'])
+				);
+			}
 
 			$data['categories'][] = array(
 				'category_id' => $category['category_id'],
-				'name'        => $category['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
+				'name'        => $category['name'],
 				'children'    => $children_data,
+				'has_children'=> $has_children,
 				'href'        => $this->url->link('product/category', 'path=' . $category['category_id'])
 				
 			);

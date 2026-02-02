@@ -114,6 +114,9 @@ $files_to_update = [
     'catalog/view/theme/Crazy/template/product/product.twig',
     'catalog/view/theme/Crazy/template/product/category.twig',
     'catalog/view/theme/Crazy/stylesheet/stylesheet.css',
+    'catalog/controller/extension/module/category.php',
+    'catalog/view/theme/Crazy/template/extension/module/category.twig',
+    'catalog/view/theme/Crazy/stylesheet/webdigify/custom.css',
     'image/catalog/2026-01-14 11.17.17-833x1000.webp',
 
     // HomePage Product Tabs 2 (новий модуль)

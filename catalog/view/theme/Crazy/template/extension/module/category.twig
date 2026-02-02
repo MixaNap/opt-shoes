@@ -3,14 +3,14 @@
   <div class="box-content">
     <ul class="box-category treeview-list treeview">
       {% for category in categories %}
-      <li>
+      <li class="{% if category.has_children %}has-children {% endif %}{% if category.category_id == first_open_id %}default-open{% endif %}">
         {% if category.category_id == category_id %}
         <a href="{{ category.href }}" class="active">{{ category.name }} </a>
         {% else %}
         <a href="{{ category.href }}">{{ category.name }}</a>
          {% endif %}
         {% if category.children %}
-        <ul>
+        <ul class="category-children">
           {% for child in category.children %}
           <li>
             {% if child.category_id == child_id %}
@@ -27,3 +27,28 @@
     </ul>	
   </div>
 </div>
+<script type="text/javascript">
+$(window).on('load', function() {
+  var $tree = $('.box-category.treeview-list');
+  if (!$tree.length) {
+    return;
+  }
+
+  if (!$tree.find('.hitarea').length) {
+    $tree.addClass('no-hitarea');
+  }
+
+  $tree.find('li.has-children').each(function() {
+    var $item = $(this);
+    if (!$item.hasClass('collapsable')) {
+      $item.addClass('expandable');
+    }
+  });
+
+  var $firstWithChildren = $tree.children('li.default-open.has-children').first();
+  if ($firstWithChildren.length) {
+    $firstWithChildren.removeClass('expandable').addClass('collapsable');
+    $firstWithChildren.children('ul').show();
+  }
+});
+</script>

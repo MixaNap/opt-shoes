@@ -109,6 +109,23 @@ span.customSelect.changed {
     font-size: 10px;
 }
 
+.treeview-list li.has-children > a {
+	position: relative;
+	padding-right: 16px;
+}
+.treeview-list li.has-children > a::after {
+	content: "+";
+	position: absolute;
+	right: 0;
+	top: 0;
+	color: #808080;
+	font-size: 12px;
+	line-height: 1;
+}
+.treeview-list li.collapsable > a::after {
+	content: "-";
+}
+
 /* TREEVIEW CATEGORY LEFT */
 
 
