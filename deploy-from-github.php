@@ -168,6 +168,7 @@ if (file_exists($configFile)) {
     preg_match("/define\('DB_PASSWORD',\s*'([^']+)'\)/", $configContent, $password);
     preg_match("/define\('DB_DATABASE',\s*'([^']+)'\)/", $configContent, $database);
     preg_match("/define\('DB_PREFIX',\s*'([^']+)'\)/", $configContent, $prefix);
+    preg_match("/define\('DIR_STORAGE',\s*'([^']+)'\)/", $configContent, $storagePathMatch);
     
     if (!empty($hostname[1]) && !empty($username[1]) && !empty($database[1])) {
         $dbHost = $hostname[1];
@@ -175,6 +176,7 @@ if (file_exists($configFile)) {
         $dbPass = isset($password[1]) ? $password[1] : '';
         $dbName = $database[1];
         $dbPrefix = isset($prefix[1]) ? $prefix[1] : 'oc_';
+        $storagePath = isset($storagePathMatch[1]) ? $storagePathMatch[1] : '';
         
         // Підключення до БД
         $mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
@@ -235,6 +237,11 @@ $possibleModificationPaths = [
     $baseDir . '/storage/modification/',
     'D:/OSPanel/domains/storage/modification/',
 ];
+
+if (!empty($storagePath)) {
+    $possibleCachePaths[] = rtrim(str_replace('\\', '/', $storagePath), '/') . '/cache/';
+    $possibleModificationPaths[] = rtrim(str_replace('\\', '/', $storagePath), '/') . '/modification/';
+}
 
 $cacheCleared = false;
 $modificationCleared = false;
