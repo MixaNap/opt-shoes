@@ -4,7 +4,7 @@ $_['heading_title'] = 'Популярні товари';
 $_['heading_subtitle'] = 'Наши товари';
 $_['heading_desc'] = 'Брендована коллекція';
 $_['tab_latest'] = 'Новинки';
-$_['tab_bestseller'] = 'Найкращі знижки';
+$_['tab_bestseller'] = 'Акційні товари';
  $_['tab_special'] = 'Товари з вигодною ціною';
 
 

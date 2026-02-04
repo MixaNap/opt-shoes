@@ -131,6 +131,8 @@ $files_to_update = [
     'catalog/controller/extension/module/webdigifytabs2.php',
     'catalog/view/theme/Crazy/template/extension/module/webdigifytabs2.twig',
     'catalog/language/en-gb/extension/module/webdigifytabs2.php',
+    'catalog/language/uk-ua/extension/module/webdigifytabs.php',
+    'catalog/language/ru-ru/extension/module/webdigifytabs.php',
     'catalog/language/uk-ua/extension/module/webdigifytabs2.php',
     'catalog/language/ru-ru/extension/module/webdigifytabs2.php',
     'catalog/view/javascript/webdigify/custom.js',

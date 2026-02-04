@@ -5,7 +5,7 @@ $_['heading_subtitle'] = 'Наши товары';
 $_['heading_desc'] = 'Брендованая коллекция';
 
 $_['tab_latest'] = 'Новинки';
-$_['tab_bestseller'] = 'Хиты продаж';
+$_['tab_bestseller'] = 'Акционные товары';
  $_['tab_special'] = 'Товари с выгодными ценами';
 
 
