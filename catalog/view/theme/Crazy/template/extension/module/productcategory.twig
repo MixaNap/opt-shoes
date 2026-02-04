@@ -38,7 +38,6 @@
       <div class="image {% if product.qty == 0 %}outstock{% endif %}">
 			{% if product.thumb_swap %}
 					<a href="{{ product.href }}">
-            <button class="wishlist" type="button"  title="{{ button_wishlist }} " onclick="wishlist.add('{{ product.product_id }} ');"></button>
 					<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive reg-image"/>
             <div class="image_content">
               <img class="img-responsive hover-image" src="{{ product.thumb_swap }}" title="{{ product.name }}" alt="{{ product.name }}"/>
@@ -61,7 +60,6 @@
                 </div>
                 <button class="compare_button" type="button"  title="{{ button_compare }} " onclick="compare.add('{{ product.product_id }} ');"></button>
               </div>
-                <button class="wishlist" type="button"  title="{{ button_wishlist }} " onclick="wishlist.add('{{ product.product_id }} ');"></button>
 		</div>
      <div class="product-details">
         <div class="caption">   

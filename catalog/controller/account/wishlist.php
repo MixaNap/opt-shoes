@@ -1,6 +1,9 @@
 <?php
 class ControllerAccountWishList extends Controller {
 	public function index() {
+		$this->response->redirect($this->url->link('common/home'));
+		return;
+
 		if (!$this->customer->isLogged()) {
 			$this->session->data['redirect'] = $this->url->link('account/wishlist', '', true);
 
@@ -114,9 +117,14 @@ class ControllerAccountWishList extends Controller {
 	}
 
 	public function add() {
-		$this->load->language('account/wishlist');
-
 		$json = array();
+		$json['error'] = 'Wishlist is disabled.';
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+		return;
+
+		$this->load->language('account/wishlist');
 
 		if (isset($this->request->post['product_id'])) {
 			$product_id = $this->request->post['product_id'];
