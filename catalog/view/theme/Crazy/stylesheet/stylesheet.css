@@ -1589,7 +1589,7 @@ div#wdcmssubbanner .wdsubbanner {
 
 #wdcmssubbanner .wdsubbanner .wdsubbanner-content .title {
     font: 600 28px/40px 'Jost', sans-serif;
-    color: #111;
+    color: #fff;
     margin: 0 0 45px;
     width: 80%;
     z-index: 8;
@@ -1599,7 +1599,7 @@ div#wdcmssubbanner .wdsubbanner {
 
 #wdcmssubbanner .wdsubbanner .wdsubbanner-content .subtitle {
     font: 600 15px/24px 'Jost', sans-serif;
-    color: #111;
+    color: #fff;
     margin: 0 0 15px;
 }
 #wdcmssubbanner .wdsubbanner .wdsubbanner-content .offer a {
@@ -9919,7 +9919,7 @@ button.btn.btn-primary.parallex-btn:hover:before  {
 .left-text1 {
 	font-size: 16px;
 	font-weight: 400;
-	color:#222;
+	color: #fff;
 	line-height: 22px;
 	padding: 0 0 5px;
 }
@@ -9927,7 +9927,7 @@ button.btn.btn-primary.parallex-btn:hover:before  {
 	font-size: 24px;
     font-weight: 500;
     line-height: 30px;
-    color: #222;
+    color: #fff;
     font-family: 'Jost', sans-serif;
 }
 @media (max-width: 1509px){
