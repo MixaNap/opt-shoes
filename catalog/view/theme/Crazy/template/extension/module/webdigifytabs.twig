@@ -35,12 +35,13 @@
 						</div>	
 					{% endif %}
 					<div class="box-product {% if productCount >= sliderFor %}product-carousel{% else %} productbox-grid-hometab{% endif %}" id="{% if productCount >= sliderFor %}tabbestseller-carousel{% else %}tabbestseller-grid{% endif %}">
-						{% for product in bestsellersproducts %}
-						{% if loop.index % 2 == 1 %}
-						<li class="double-slideitem slider-item">
-							<ul>
-							{% endif %}
-							<div class="{% if productCount >= sliderFor %}slider-item{% else %}product-items{% endif %}">
+						{% if productCount >= sliderFor %}
+							{% for product in bestsellersproducts %}
+								{% if loop.index % 2 == 1 %}
+								<li class="double-slideitem slider-item">
+									<ul>
+								{% endif %}
+								<div class="slider-item">
 								<div class="product-block product-thumb transition">
 									<div class="product-block-inner">	  	
 										<div class="image {% if product.qty == 0 %}outstock{% endif %}">
@@ -123,11 +124,85 @@
 								    });
 								 </script>
 							</div>
-							{% if loop.index % 2 != 1 %}
-							</ul>
-						</li>
-					{% endif %}
-						{% endfor %}
+								{% if loop.index % 2 != 1 or loop.last %}
+									</ul>
+								</li>
+								{% endif %}
+							{% endfor %}
+						{% else %}
+							{% for product in bestsellersproducts %}
+								<div class="product-items">
+									<div class="product-block product-thumb transition">
+										<div class="product-block-inner">	  	
+											<div class="image {% if product.qty == 0 %}outstock{% endif %}">
+
+												{% if product.thumb_swap %}
+													<a href="{{ product.href }}">
+														
+													<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive reg-image"/>
+													<div class="image_content">
+													<img class="img-responsive hover-image" src="{{ product.thumb_swap }}" title="{{ product.name }}" alt="{{ product.name }}"/></div>
+													</a>
+													{% else %}
+													<a href="{{ product.href }}">
+													<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive"/></a>
+											{% endif %}
+											{% if product.special %}
+												<span class="special-tag">{{product.percentsaving}}%</span>
+											{% endif %}
+											{% if product.qty == 0 %}
+												<span class="stock_status">{{text_outstock}}</span>
+											{% endif %}
+											<div class="countdown">
+												{% if product.specialTime %}
+												 <div class="count-down clock">
+												<div data-countdown="{{ product.specialTime }}" class="countbox hastime"></div>
+												</div>	
+												{% endif %}
+											</div>	
+											</div>
+											<div class="product-details">
+											<div class="caption">
+												  
+											{% if product.rating %}
+												<div class="rating">
+												{% for i in 1..5 %}
+												{% if product.rating < i %}
+												<span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+												{% else %}
+												<span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+												{% endif %}
+												{% endfor %}
+												</div>
+											{% endif %}
+												
+												<h4><a href="{{ product.href }} ">{{ product.name }}</a></h4> 
+												{# icons hidden on home tabs #}
+												<div class="action" style="display: flex; align-items: center; gap: 10px;">
+													{% if product.qty > 0 %}
+														<button type="button" class="cart_button" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" >{{ button_cart }}</button>
+														{% else %}
+														<button type="button" class="cart_button out_of_stock" title="{{text_outstock}}" >{{text_outstock}}</button>
+													{% endif %}
+													{% set display_price = '' %}
+													{% if product.price_per_unit_formatted is defined and product.price_per_unit_formatted and product.price_per_unit_formatted != '' %}
+														{% set display_price = product.price_per_unit_formatted %}
+													{% elseif product.special is defined and product.special and product.special != '' and product.special != false %}
+														{% set display_price = product.special %}
+													{% elseif product.price is defined and product.price and product.price != '' and product.price != false %}
+														{% set display_price = product.price %}
+													{% endif %}
+													{% if display_price != '' %}
+														<span class="tab-price-inline">{{ display_price }}</span>
+													{% endif %}
+												</div>
+											</div>	
+										</div>
+									</div>
+									</div>
+								</div>
+							{% endfor %}
+						{% endif %}
 					</div>
 				</div>
 			 </div>
@@ -149,12 +224,13 @@
 						</div>	
 					{% endif %}
 					<div class="box-product {% if productCount >= sliderFor %}product-carousel{% else %} productbox-grid{% endif %}" id="{% if productCount >= sliderFor %}tablatest-carousel{% else %}tablatest-grid{% endif %}">
-					{% for product in latestproducts %}
-					{% if loop.index % 2 == 1 %}
-					<li class="double-slideitem slider-item">
-						<ul>
-							{% endif %}
-							<div class="{% if productCount >= sliderFor %}slider-item{% else %}product-items{% endif %}">
+						{% if productCount >= sliderFor %}
+							{% for product in latestproducts %}
+								{% if loop.index % 2 == 1 %}
+								<li class="double-slideitem slider-item">
+									<ul>
+								{% endif %}
+								<div class="slider-item">
 								<div class="product-block product-thumb transition">
 									<div class="product-block-inner">	  	
 										<div class="image {% if product.qty == 0 %}outstock{% endif %}">
@@ -241,11 +317,85 @@
 								    });
 								 </script>
 							</div>
-							{% if loop.index % 2 != 1 %}
-							</ul>
-						</li>
-					{% endif %}
-						{% endfor %}
+								{% if loop.index % 2 != 1 or loop.last %}
+									</ul>
+								</li>
+								{% endif %}
+							{% endfor %}
+						{% else %}
+							{% for product in latestproducts %}
+								<div class="product-items">
+									<div class="product-block product-thumb transition">
+										<div class="product-block-inner">	  	
+											<div class="image {% if product.qty == 0 %}outstock{% endif %}">
+
+												{% if product.thumb_swap %}
+													<a href="{{ product.href }}">
+														
+													<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive reg-image"/>
+													<div class="image_content">
+													<img class="img-responsive hover-image" src="{{ product.thumb_swap }}" title="{{ product.name }}" alt="{{ product.name }}"/></div>
+													</a>
+													{% else %}
+													<a href="{{ product.href }}">
+													<img src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}" class="img-responsive"/></a>
+											{% endif %}
+											{% if product.special %}
+												<span class="special-tag">{{product.percentsaving}}%</span>
+											{% endif %}
+											{% if product.qty == 0 %}
+												<span class="stock_status">{{text_outstock}}</span>
+											{% endif %}
+											<div class="countdown">
+												{% if product.specialTime %}
+												 <div class="count-down clock">
+												<div data-countdown="{{ product.specialTime }}" class="countbox hastime"></div>
+												</div>	
+												{% endif %}
+											</div>	
+											</div>
+											<div class="product-details">
+											<div class="caption">
+												  
+											{% if product.rating %}
+												<div class="rating">
+												{% for i in 1..5 %}
+												{% if product.rating < i %}
+												<span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+												{% else %}
+												<span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+												{% endif %}
+												{% endfor %}
+												</div>
+											{% endif %}
+												
+												<h4><a href="{{ product.href }} ">{{ product.name }}</a></h4> 
+												{# icons hidden on home tabs #}
+												<div class="action" style="display: flex; align-items: center; gap: 10px;">
+													{% if product.qty > 0 %}
+														<button type="button" class="cart_button" onclick="cart.add('{{ product.product_id }}');" title="{{ button_cart }}" >{{ button_cart }}</button>
+														{% else %}
+														<button type="button" class="cart_button out_of_stock" title="{{text_outstock}}" >{{text_outstock}}</button>
+													{% endif %}
+													{% set display_price = '' %}
+													{% if product.price_per_unit_formatted is defined and product.price_per_unit_formatted and product.price_per_unit_formatted != '' %}
+														{% set display_price = product.price_per_unit_formatted %}
+													{% elseif product.special is defined and product.special and product.special != '' and product.special != false %}
+														{% set display_price = product.special %}
+													{% elseif product.price is defined and product.price and product.price != '' and product.price != false %}
+														{% set display_price = product.price %}
+													{% endif %}
+													{% if display_price != '' %}
+														<span class="tab-price-inline">{{ display_price }}</span>
+													{% endif %}
+												</div>
+											</div>	
+										</div>
+									</div>
+									</div>
+								</div>
+							{% endfor %}
+						{% endif %}
 					</div>
 				</div>
 			 </div>
